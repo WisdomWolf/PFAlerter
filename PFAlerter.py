@@ -72,14 +72,15 @@ def pullJSONValue(key, list):
 def sendEmail():
     FROM = user
     SUBJECT = "Python Test"
-    TEXT = "Testing sending acketz with python through gmail"
+    TEXT = "Testing sending message with python"
     
     #Prepare actual message
-    message = '\r\n'.join(['To: %s' % emailRecipient, 'From: %s' % gmailUser, 'Subject: %s' % SUBJECT, '', TEXT])
+    message = '\r\n'.join(['To: %s' % emailRecipient, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
     
     server = smtplib.SMTP(smtpServer, serverPort)
-    server.ehlo()
+    server.helo()
     server.starttls()
+    server.helo()
     server.login(user, pwd)
     
     try:
@@ -90,18 +91,18 @@ def sendEmail():
         
     server.quit()
     
-buildRequester()
-jsonData = pullJSON()
+#buildRequester()
+#jsonData = pullJSON()
 #jsonToTextFile(jsonData)
 
-listenerStr = "Listeners: \r\n----------\r\n"
+#listenerStr = "Listeners: \r\n----------\r\n"
 
-listenerList = jsonData['ListenersContainer']['Listener']
+#listenerList = jsonData['ListenersContainer']['Listener']
 
-listenerStr += pullJSONValue('name', listenerList)
+#listenerStr += pullJSONValue('name', listenerList)
 
-print(listenerStr)
-#sendEmail()
+#print(listenerStr)
+sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
