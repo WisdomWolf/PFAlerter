@@ -78,10 +78,17 @@ def sendEmail():
     message = '\r\n'.join(['To: %s' % emailRecipient, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
     
     server = smtplib.SMTP(smtpServer, serverPort)
-    server.helo()
-    server.starttls()
-    server.helo()
+    server.ehlo()
+    
+    if server.has_extn('STARTTLS'):
+        print('made it!!!')
+        server.starttls()
+        server.ehlo()
+    
+    server.ehlo()
+    
     server.login(user, pwd)
+    
     
     try:
         server.sendmail(FROM, emailRecipient, message)
