@@ -6,6 +6,7 @@ import codecs
 import urllib.request
 import smtplib
 import configparser
+import base64
 
 #print("JSON testing")
 
@@ -81,11 +82,9 @@ def sendEmail():
     server.ehlo()
     
     if server.has_extn('STARTTLS'):
-        print('made it!!!')
         server.starttls()
-        server.ehlo()
-    
-    server.ehlo()
+            
+    print(server.ehlo())
     
     server.login(user, pwd)
     
