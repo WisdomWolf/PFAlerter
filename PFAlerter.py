@@ -22,6 +22,7 @@ serverPort = int(config['Email']['serverPort'])
 user = config['Email']['senderAddress']
 pwd = config['Email']['senderPassword']
 emailRecipient = config['Email']['receiverAddress']
+FROM = config['Email']['from']
 
 #builds the authentication and request handlers
 def buildRequester():
@@ -71,7 +72,6 @@ def pullJSONValue(key, list):
     return keyStr
 
 def sendEmail():
-    FROM = user
     SUBJECT = "Python Test"
     TEXT = "Testing sending message with python"
     
@@ -84,10 +84,7 @@ def sendEmail():
     if server.has_extn('STARTTLS'):
         server.starttls()
             
-    print(server.ehlo())
-    
     server.login(user, pwd)
-    
     
     try:
         server.sendmail(FROM, emailRecipient, message)
