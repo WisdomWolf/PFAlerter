@@ -20,7 +20,7 @@ headers = { 'Accept' : json_req }
 smtpServer = config['Email']['smtpServer']
 serverPort = int(config['Email']['serverPort'])
 user = config['Email']['senderAddress']
-pwd = config['Email']['senderPassword']
+pwd = (base64.b64decode(config['Email']['senderPassword'])).decode() #basic password encoding
 emailRecipient = config['Email']['receiverAddress']
 FROM = config['Email']['from']
 
