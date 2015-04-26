@@ -7,6 +7,7 @@ import urllib.request
 import smtplib
 import configparser
 import base64
+import string
 
 #print("JSON testing")
 
@@ -21,7 +22,8 @@ smtpServer = config['Email']['smtpServer']
 serverPort = int(config['Email']['serverPort'])
 user = config['Email']['senderAddress']
 pwd = config['Email']['senderPassword']
-emailRecipient = config['Email']['receiverAddress']
+recipients = config['Email']['receiverAddresses']
+emailRecipients = recipients.split(';')
 FROM = config['Email']['from']
 
 #builds the authentication and request handlers
@@ -76,7 +78,7 @@ def sendEmail():
     TEXT = "Testing sending message with python"
     
     #Prepare actual message
-    message = '\r\n'.join(['To: %s' % emailRecipient, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
+    message = '\r\n'.join(['To: %s' % emailRecipients, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
     
     server = smtplib.SMTP(smtpServer, serverPort)
     server.ehlo()
@@ -87,7 +89,7 @@ def sendEmail():
     server.login(user, pwd)
     
     try:
-        server.sendmail(FROM, emailRecipient, message)
+        server.sendmail(FROM, emailRecipients, message)
         print("Sucessfully sent the mail")
     except:
         print("Failed to send mail")
