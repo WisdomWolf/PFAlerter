@@ -14,7 +14,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 theurl = config['PF Listener']['url']
 username = config['PF Listener']['username']
-password = config['PF Listener']['password']
+password = base64.b64decode(config['PF Listener']['password'])
 json_req = 'application/json'
 headers = { 'Accept' : json_req }
 smtpServer = config['Email']['smtpServer']
