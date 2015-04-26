@@ -1,7 +1,6 @@
 #! python3
 import base64
 import codecs
-<<<<<<< HEAD
 import clipboard
 
 with codecs.open('password.txt', 'w', 'utf-8') as simpleOutput:
@@ -13,12 +12,10 @@ with codecs.open('password.txt', 'w', 'utf-8') as simpleOutput:
     print(y)
     clipboard.copy(y)
     input('complete')
-=======
 
 x = input('Enter password to encode:\n')
 print('password encoded:')
 y = base64.b64encode(x)
 print(y)
 input('')
->>>>>>> 646f5deb74d9f863cb4ccfb3ae862487f8ddbdd7
 
