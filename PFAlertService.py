@@ -30,11 +30,11 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
 
     def main(self):
         while (time.time() < 1430179200):
-            s.enter(10, 2, test_time, argument=(5,))
-            s.run()
+            self.s.enter(10, 2, self.test_time, argument=(5,))
+            self.s.run()
             
     def test_time(a=5):
-        compareTime = get_compare_time()
+        compareTime = self.get_compare_time()
         print('Comparing current time', int(time.time()))
         if int(time.time()) > (int(compareTime) + (a * 60)):
             print('its been too long since last compare:', compareTime)
