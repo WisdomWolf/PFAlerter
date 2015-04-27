@@ -12,6 +12,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
     _svc_name_ = "PFAlertService"
     _svc_display_name_ = "Python Test Alert Service"
     s = sched.scheduler(time.time, time.sleep)
+    isAlive = True
 
     def __init__(self,args):
         win32serviceutil.ServiceFramework.__init__(self,args)
@@ -21,6 +22,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
     def SvcStop(self):
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
+        self.isAlive = False
 
     def SvcDoRun(self):
         servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
@@ -29,27 +31,25 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         self.main()
 
     def main(self):
-        while (time.time() < 1430179200):
-            self.s.enter(10, 2, self.test_time, argument=(5,))
+        while (time.time() < 1430179200 and self.isAlive):
+            self.s.enter(10, 2, test_time, argument=(5,))
             self.s.run()
-            
-    def test_time(a=5):
-        compareTime = self.get_compare_time()
-        print('Comparing current time', int(time.time()))
-        if int(time.time()) > (int(compareTime) + (a * 60)):
-            print('its been too long since last compare:', compareTime)
-            winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
-        else:
-            print('All good.  Last compare:', compareTime)
-        
-    def get_compare_time():
-        with codecs.open('time.txt', 'r', 'utf-8') as file:
-            result = ''
-            for line in file:
-                result = line
-            return result
 
 if __name__ == '__main__':
     win32serviceutil.HandleCommandLine(AppServerSvc)
 
-    
+def test_time(a=5):
+    compareTime = get_compare_time()
+    print('Comparing current time', int(time.time()))
+    if int(time.time()) > (int(compareTime) + (a * 60)):
+        print('its been too long since last compare:', compareTime)
+        winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
+    else:
+        print('All good.  Last compare:', compareTime)
+        
+def get_compare_time():
+    with codecs.open("C:/Users/Public/Documents/time.txt", 'r', 'utf-8') as file:
+        result = ''
+        for line in file:
+            result = line
+        return result
