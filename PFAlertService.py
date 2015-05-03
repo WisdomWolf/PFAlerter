@@ -32,7 +32,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
 
     def main(self):
         while (time.time() < 1430179200 and self.isAlive):
-            self.s.enter(10, 2, test_time, argument=(5,))
+            self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
             self.s.run()
 
 if __name__ == '__main__':
