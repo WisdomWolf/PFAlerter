@@ -5,26 +5,32 @@ import json
 import codecs
 import urllib.request
 import smtplib
-import configparser
+from configparser import ConfigParser
+from socket import gaierror
 import base64
 import string
 
 #print("JSON testing")
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-theurl = config['PF Listener']['url']
-username = config['PF Listener']['username']
-password = config['PF Listener']['password']
-json_req = 'application/json'
-headers = { 'Accept' : json_req }
-smtpServer = config['Email']['smtpServer']
-serverPort = int(config['Email']['serverPort'])
-user = config['Email']['senderAddress']
-pwd = (base64.b64decode(config['Email']['senderPassword'])).decode()
-recipients = config['Email']['receiverAddresses']
-emailRecipients = recipients.split(';')
-FROM = config['Email']['from']
+def importConfig():
+    config = ConfigParser()
+    config.read('config.ini')
+    global theurl, username, password, json_req, headers, smtpServer, serverPort, user, pwd, emailRecipients, FROM
+    theurl = config['PF Listener']['url']
+    username = config['PF Listener']['username']
+    password = config['PF Listener']['password']
+    json_req = 'application/json'
+    headers = { 'Accept' : json_req }
+    smtpServer = config['Email']['smtpServer']
+    try:
+        serverPort = int(config['Email']['serverPort'])
+    except ValueError:
+        input('malformed config file. <Bad Server Port> Aborting...')
+        os._exit(0)
+    user = config['Email']['senderAddress']
+    pwd = (base64.b64decode(config['Email']['senderPassword'])).decode() #basic password encoding
+    emailRecipients = config['Email']['receiverAddresses']
+    FROM = config['Email']['from']
 
 #builds the authentication and request handlers
 def buildRequester():
@@ -79,15 +85,24 @@ def sendEmail():
     TEXT = "Testing sending message with python"
     
     #Prepare actual message
+    importConfig()
     message = '\r\n'.join(['To: %s' % emailRecipients, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
     
-    server = smtplib.SMTP(smtpServer, serverPort)
+    try:
+        server = smtplib.SMTP(smtpServer, serverPort)
+    except gaierror:
+        input('Error with socket.  Aborting...')
+        os._exit(0)
     server.ehlo()
     
     if server.has_extn('STARTTLS'):
         server.starttls()
-            
-    server.login(user, pwd)
+    
+    try:
+        server.login(user, pwd)
+    except smtplib.SMTPAuthenticationError:
+        input('Unable to authenticate with provided credentials.  Aborting...')
+        os._exit(0)
     
     try:
         server.sendmail(FROM, emailRecipients, message)
