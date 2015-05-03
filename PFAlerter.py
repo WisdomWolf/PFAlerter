@@ -9,6 +9,7 @@ from configparser import ConfigParser
 from socket import gaierror
 import base64
 import string
+import pdb
 
 #print("JSON testing")
 
@@ -125,4 +126,4 @@ def JSONTest():
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
-#input("")
+pdb.set_trace()
