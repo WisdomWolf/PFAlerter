@@ -13,3 +13,10 @@ with codecs.open('password.txt', 'w', 'utf-8') as simpleOutput:
     clipboard.copy(y)
     input('complete')
 
+x = input('Enter password to encode:\n')
+print('password encoded:')
+y = base64.b64encode(x)
+print(y)
+input('')
+
+

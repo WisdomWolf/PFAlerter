@@ -7,6 +7,7 @@ import urllib.request
 import smtplib
 import configparser
 import base64
+import string
 
 #print("JSON testing")
 
@@ -20,8 +21,9 @@ headers = { 'Accept' : json_req }
 smtpServer = config['Email']['smtpServer']
 serverPort = int(config['Email']['serverPort'])
 user = config['Email']['senderAddress']
-pwd = config['Email']['senderPassword']
-emailRecipient = config['Email']['receiverAddress']
+pwd = (base64.b64decode(config['Email']['senderPassword'])).decode()
+recipients = config['Email']['receiverAddresses']
+emailRecipients = recipients.split(';')
 FROM = config['Email']['from']
 
 #builds the authentication and request handlers
@@ -46,22 +48,23 @@ def buildRequester():
     # authentication is now handled automatically for us
     return
 
-    #pulls the JSON data and puts it into Python object format
+"""pulls the JSON data and puts it into Python object format"""
 def pullJSON():
     req = urllib.request.Request(theurl, None, headers)
     response = urllib.request.urlopen(req)
     str_response = response.readall().decode('utf-8')
     data = json.loads(str_response)
+    
     return data
     
-    #sends the json data to text file with "pretty printing"
+"""sends the json data to text file with 'pretty printing'"""
 def jsonToTextFile(data):
     data = json.dumps(data, sort_keys=True, indent=4)
     with codecs.open('json.txt', 'w+', 'utf-8') as save_file:
         save_file.write(str(data))
     return
 
-    # pulls a specific element from the JSON list
+"""pulls a specific element from the JSON list"""
 def pullJSONValue(key, list):
     keyStr = ""
     for i, j in zip(list, range(1, len(list)+1)):
@@ -76,7 +79,7 @@ def sendEmail():
     TEXT = "Testing sending message with python"
     
     #Prepare actual message
-    message = '\r\n'.join(['To: %s' % emailRecipient, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
+    message = '\r\n'.join(['To: %s' % emailRecipients, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
     
     server = smtplib.SMTP(smtpServer, serverPort)
     server.ehlo()
@@ -87,26 +90,24 @@ def sendEmail():
     server.login(user, pwd)
     
     try:
-        server.sendmail(FROM, emailRecipient, message)
+        server.sendmail(FROM, emailRecipients, message)
         print("Sucessfully sent the mail")
     except:
         print("Failed to send mail")
         
     server.quit()
+
+def JSONTest():    
+    buildRequester()
+    jsonData = pullJSON()
+    jsonToTextFile(jsonData)
+    listenerStr = "Listeners: \r\n----------\r\n"
+    listenerList = jsonData['ListenersContainer']['Listener']
+    listenerStr += pullJSONValue('name', listenerList)
+    print(listenerStr)
     
-#buildRequester()
-#jsonData = pullJSON()
-#jsonToTextFile(jsonData)
-
-#listenerStr = "Listeners: \r\n----------\r\n"
-
-#listenerList = jsonData['ListenersContainer']['Listener']
-
-#listenerStr += pullJSONValue('name', listenerList)
-
-#print(listenerStr)
-sendEmail()
+#sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
-input("")
+#input("")
