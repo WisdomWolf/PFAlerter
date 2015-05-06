@@ -75,11 +75,11 @@ def jsonToTextFile(data, fileName):
     return
     
 """gnenerates JSON txt file adding the key and values specified by the user"""
-def buildTestJSON(fileToRead, fileToWrite):
-    data = open(fileToRead).read()
+def buildTestJSON(fileIn, fileOut):
+    data = open(fileIn).read()
     data = json.loads(data)
     testList = data['ListenersContainer']['Listener']
-    newElementKey = input('Please enter name of new element key: ')
+    newElementKey = input('Enter name of new element key: ')
     
     for i, j in zip(testList, range(1, len(testList)+1)):
         print('\r\n', j, ".", i['name'])
@@ -87,7 +87,7 @@ def buildTestJSON(fileToRead, fileToWrite):
         i[newElementKey] = int(newElementValue)
     
     data['ListenersContainer']['Listener'] = testList
-    jsonToTextFile(data, fileToWrite)
+    jsonToTextFile(data, fileOut)
     return
     
 
