@@ -62,8 +62,8 @@ def pullJSON():
     
     return data
     
-def pullJSONFromTextFile():
-    data = open('json.txt').read()
+def pullJSONFromTextFile(fileIn):
+    data = open(fileIn).read()
         
     return data
     
