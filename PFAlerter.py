@@ -11,8 +11,6 @@ import base64
 import string
 import pdb
 
-#print("JSON testing")
-
 def importConfig():
     config = ConfigParser()
     config.read('config.ini')
@@ -33,7 +31,7 @@ def importConfig():
     emailRecipients = config['Email']['receiverAddresses']
     FROM = config['Email']['from']
 
-#builds the authentication and request handlers
+"""builds the authentication and request handlers"""
 def buildRequester():
     passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
     # this creates a password manager
@@ -64,6 +62,11 @@ def pullJSON():
     
     return data
     
+def pullJSONFromTextFile():
+    data = open('json.txt').read()
+        
+    return data
+    
 """sends the json data to text file with 'pretty printing'"""
 def jsonToTextFile(data):
     data = json.dumps(data, sort_keys=True, indent=4)
@@ -76,9 +79,9 @@ def pullJSONValue(key, list):
     keyStr = ""
     for i, j in zip(list, range(1, len(list)+1)):
         if j < 10:
-            keyStr += str(j) + ".  " + i[key] + "\r\n"
+            keyStr += str(j) + ".  " + str(i[key]) + "\r\n"
         else:
-            keyStr += str(j) + ". " + i[key] + "\r\n"
+            keyStr += str(j) + ". " + str(i[key]) + "\r\n"
     return keyStr
 
 def sendEmail():
