@@ -68,11 +68,28 @@ def pullJSONFromTextFile():
     return data
     
 """sends the json data to text file with 'pretty printing'"""
-def jsonToTextFile(data):
+def jsonToTextFile(data, fileName):
     data = json.dumps(data, sort_keys=True, indent=4)
-    with codecs.open('json.txt', 'w+', 'utf-8') as save_file:
+    with codecs.open(fileName, 'w+', 'utf-8') as save_file:
         save_file.write(str(data))
     return
+    
+"""gnenerates JSON txt file adding the key and values specified by the user"""
+def buildTestJSON(fileToRead, fileToWrite):
+    data = open(fileToRead).read()
+    data = json.loads(data)
+    testList = data['ListenersContainer']['Listener']
+    newElementKey = input('Please enter name of new element key: ')
+    
+    for i, j in zip(testList, range(1, len(testList)+1)):
+        print('\r\n', j, ".", i['name'])
+        newElementValue = input(str(newElementKey) + ': ')
+        i[newElementKey] = int(newElementValue)
+    
+    data['ListenersContainer']['Listener'] = testList
+    jsonToTextFile(data, fileToWrite)
+    return
+    
 
 """pulls a specific element from the JSON list"""
 def pullJSONValue(key, list):
