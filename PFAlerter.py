@@ -128,8 +128,10 @@ def sendEmail():
     try:
         server.sendmail(FROM, emailRecipients, message)
         print("Sucessfully sent the mail")
+    #except smtplib.SMTPDataError:
+    #    print("Failed to send mail.  Possible permissions error.")
     except:
-        print("Failed to send mail")
+        print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
         
     server.quit()
 
