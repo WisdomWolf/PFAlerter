@@ -68,9 +68,9 @@ class PFAlert:
             
         server.quit()
     
-
-    """builds the authentication and request handlers"""
     def buildRequester(self):
+        """builds the authentication and request handlers"""
+        
         passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
         # this creates a password manager
         passman.add_password(None, self.theurl, self.serverUsername, self.serverPassword)
@@ -91,8 +91,9 @@ class PFAlert:
         # authentication is now handled automatically for us
         return
 
-    """pulls the JSON data and puts it into Python object format"""
     def pullJSON(self):
+        """pulls the JSON data and puts it into Python object format"""
+        
         req = urllib.request.Request(self.theurl, None, HEADERS)
         response = urllib.request.urlopen(req)
         str_response = response.readall().decode('utf-8')
@@ -108,20 +109,48 @@ class PFAlert:
         listenerStr += pullJSONValue('name', listenerList)
         print(listenerStr)
         
+    def TSLTIterator(self, listenerList):
+        """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
+        
+        for listner in listnerList:
+            #parse listenerName and timeSinceLastTransmission
+            self.thresholdCompare(listenerName, timeSinceLastTransmission)
+        
+    def thresholdCompare(self, listenerName, timeSinceLastTransmission, threshold):
+        """Compares transaction time to threshold and sounds alarm if necessary."""
+        
+        if timeSinceLastTransmission > threshold:
+            lastTransmissionTime = epoch - timeSinceLastTransmission
+            if lastTransmissionTime > self.config[listenername]['Last Transmission Time']:
+                soundAlarm(listenerName)
+            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransmissionTime)""")
+        pass
+        
+    def soundAlarm(self, listenerName=None, emailRecipients=None):
+        """Generates alert email when listener reports an unacceptable transaction time"""
+        pass
+        
+    def writeToLog(self, data, timestamp=None, log_file=None):
+        timestamp = timestamp or #current time
+        log_file = log_file or 'PFAlerter.log'
+        with codecs.open(log_file, 'utf-8') as file:
+            file.write(timestamp, data)
+        
 def pullJSONFromTextFile(fileIn):
     data = open(fileIn).read()
         
     return data
     
-"""sends the json data to text file with 'pretty printing'"""
 def jsonToTextFile(data, fileName):
+    """sends the json data to text file with 'pretty printing'"""
+    
     data = json.dumps(data, sort_keys=True, indent=4)
     with codecs.open(fileName, 'w+', 'utf-8') as save_file:
         save_file.write(str(data))
     return
     
-"""gnenerates JSON txt file adding the key and values specified by the user"""
 def buildTestJSON(fileIn, fileOut):
+    """gnenerates JSON txt file adding the key and values specified by the user"""
     data = open(fileIn).read()
     data = json.loads(data)
     testList = data['ListenersContainer']['Listener']
@@ -136,8 +165,8 @@ def buildTestJSON(fileIn, fileOut):
     jsonToTextFile(data, fileOut)
     return
     
-"""pulls a specific element from the JSON list"""
 def pullJSONValue(key, list):
+    """pulls a specific element from the JSON list"""
     keyStr = ""
     for i, j in zip(list, range(1, len(list)+1)):
         if j < 10:
