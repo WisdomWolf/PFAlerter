@@ -33,7 +33,40 @@ class PFAlert:
         self.emailUser = self.config['Email']['senderAddress']
         self.emailPassword = (base64.b64decode(self.config['Email']['senderPassword'])).decode()
         self.emailRecipients = self.config['Email']['receiverAddresses']
-        FROM = self.config['Email']['from']
+        self.FROM = self.config['Email']['from']
+        
+    def sendEmail(self, subject=None, text=None):
+        SUBJECT = subject or 'Python Test'
+        TEXT = text or 'Testing sending message with python'
+        
+        #Prepare actual message
+        message = '\r\n'.join(['To: %s' % self.emailRecipients, 'From: %s' % self.FROM, 'Subject: %s' % SUBJECT, '', TEXT])
+        
+        try:
+            server = smtplib.SMTP(self.smtpServer, self.serverPort)
+        except gaierror:
+            input('Error with socket.  Aborting...')
+            os._exit(0)
+        server.ehlo()
+        
+        if server.has_extn('STARTTLS'):
+            server.starttls()
+        
+        try:
+            server.login(self.emailUser, self.emailPassword)
+        except smtplib.SMTPAuthenticationError:
+            input('Unable to authenticate with provided credentials.  Aborting...')
+            os._exit(0)
+        
+        try:
+            server.sendmail(self.FROM, self.emailRecipients, message)
+            print("Sucessfully sent the mail")
+        #except smtplib.SMTPDataError:
+        #    print("Failed to send mail.  Possible permissions error.")
+        except:
+            print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
+            
+        server.quit()
     
                 
 
@@ -126,40 +159,6 @@ def pullJSONValue(key, list):
         else:
             keyStr += str(j) + ". " + str(i[key]) + "\r\n"
     return keyStr
-
-def sendEmail():
-    SUBJECT = "Python Test"
-    TEXT = "Testing sending message with python"
-    
-    #Prepare actual message
-    importConfig()
-    message = '\r\n'.join(['To: %s' % emailRecipients, 'From: %s' % FROM, 'Subject: %s' % SUBJECT, '', TEXT])
-    
-    try:
-        server = smtplib.SMTP(smtpServer, serverPort)
-    except gaierror:
-        input('Error with socket.  Aborting...')
-        os._exit(0)
-    server.ehlo()
-    
-    if server.has_extn('STARTTLS'):
-        server.starttls()
-    
-    try:
-        server.login(user, pwd)
-    except smtplib.SMTPAuthenticationError:
-        input('Unable to authenticate with provided credentials.  Aborting...')
-        os._exit(0)
-    
-    try:
-        server.sendmail(FROM, emailRecipients, message)
-        print("Sucessfully sent the mail")
-    #except smtplib.SMTPDataError:
-    #    print("Failed to send mail.  Possible permissions error.")
-    except:
-        print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
-        
-    server.quit()
 
 def JSONTest():    
     buildRequester()
