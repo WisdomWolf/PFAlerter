@@ -11,6 +11,32 @@ import base64
 import string
 import pdb
 
+class PFAlert:
+
+    JSON_REQ = 'application/json'
+    HEADERS = {'Accept':JSON_REQ}
+
+    def __init__(self, configFile, threshold=None, timerResolution=None,
+                 emailRecipients=None
+                ):
+        self.config = ConfigParser()
+        self.config.read(configFile)
+        self.theurl = self.config['PF Listener']['url']
+        self.serverUsername = self.config['PF Listener']['username']
+        self.serverPassword = self.config['PF Listener']['password']
+        self.smtpServer = self.config['Email']['smtpServer']
+        try:
+            self.serverPort = int(self.config['Email']['serverPort'])
+        except ValueError:
+            input('malformed config file. <Bad Server Port> Aborting...')
+            os._exit(0)
+        self.emailUser = self.config['Email']['senderAddress']
+        self.emailPassword = (base64.b64decode(self.config['Email']['senderPassword'])).decode()
+        self.emailRecipients = self.config['Email']['receiverAddresses']
+        FROM = self.config['Email']['from']
+    
+                
+
 def importConfig():
     config = ConfigParser()
     config.read('config.ini')
@@ -148,4 +174,5 @@ def JSONTest():
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
+alertTest = PFAlert('config.ini')
 pdb.set_trace()
