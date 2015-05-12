@@ -106,7 +106,7 @@ class PFAlert:
         #jsonToTextFile(jsonData)
         jsonData = pullJSONFromTextFile(jsonSourceFile)
         listenerList = jsonData['ListenersContainer']['Listener']
-        self.TSLTIterator(self, listenerList)
+        self.TSLTIterator(listenerList)
         
     def TSLTIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
