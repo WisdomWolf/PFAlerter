@@ -94,20 +94,21 @@ class PFAlert:
     def pullJSON(self):
         """pulls the JSON data and puts it into Python object format"""
         
-        req = urllib.request.Request(self.theurl, None, HEADERS)
+        req = urllib.request.Request(self.theurl, None, PFAlert.HEADERS)
         response = urllib.request.urlopen(req)
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
         
-    def JSONTest(self):    
-        self.buildRequester()
-        jsonData = self.pullJSON()
-        jsonToTextFile(jsonData)
-        listenerStr = "Listeners: \r\n----------\r\n"
+    def JSONTest(self, jsonSourceFile=None):    
+        #self.buildRequester()
+        #jsonData = self.pullJSON()
+        #jsonToTextFile(jsonData)
+        jsonData = pullJSONFromTextFile(jsonSourceFile)
         listenerList = jsonData['ListenersContainer']['Listener']
-        listenerStr += pullJSONValue('name', listenerList)
-        print(listenerStr)
+        listenerNameList = pullJSONValues('name', listenerList)
+        listenerTSLTList = pullJSONValues('TimeSinceLastTransaction', listenerList)
+        print(listenerNameList,listenerTSLTList)
         
     def TSLTIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
@@ -131,7 +132,7 @@ class PFAlert:
         pass
         
     def writeToLog(self, data, timestamp=None, log_file=None):
-        timestamp = timestamp or #current time
+        timestamp = timestamp #or current time
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'utf-8') as file:
             file.write(timestamp, data)
@@ -139,7 +140,7 @@ class PFAlert:
 def pullJSONFromTextFile(fileIn):
     data = open(fileIn).read()
         
-    return data
+    return json.loads(data)
     
 def jsonToTextFile(data, fileName):
     """sends the json data to text file with 'pretty printing'"""
@@ -165,15 +166,14 @@ def buildTestJSON(fileIn, fileOut):
     jsonToTextFile(data, fileOut)
     return
     
-def pullJSONValue(key, list):
-    """pulls a specific element from the JSON list"""
-    keyStr = ""
-    for i, j in zip(list, range(1, len(list)+1)):
-        if j < 10:
-            keyStr += str(j) + ".  " + str(i[key]) + "\r\n"
-        else:
-            keyStr += str(j) + ". " + str(i[key]) + "\r\n"
-    return keyStr
+def pullJSONValues(key, list):
+    """returns a list from the JSON of the element specified"""
+    elementList = []
+    for i in list:
+        print(i[key])
+        elementList.append(i[key])
+    
+    return elementList
     
 #sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
