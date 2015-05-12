@@ -106,25 +106,25 @@ class PFAlert:
         #jsonToTextFile(jsonData)
         jsonData = pullJSONFromTextFile(jsonSourceFile)
         listenerList = jsonData['ListenersContainer']['Listener']
-        listenerNameList = pullJSONValues('name', listenerList)
-        listenerTSLTList = pullJSONValues('TimeSinceLastTransaction', listenerList)
-        print(listenerNameList,listenerTSLTList)
+        self.TSLTIterator(self, listenerList)
         
     def TSLTIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
         
-        for listner in listnerList:
-            #parse listenerName and timeSinceLastTransmission
-            self.thresholdCompare(listenerName, timeSinceLastTransmission)
+        for listener in listenerList:
+            #parse listenerName and timeSinceLastTransaction
+            listenerName = listener['name']
+            timeSinceLastTransaction = listener['TimeSinceLastTransaction']
+            self.thresholdCompare(listenerName, timeSinceLastTransaction, 300000)
         
-    def thresholdCompare(self, listenerName, timeSinceLastTransmission, threshold):
+    def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
-        if timeSinceLastTransmission > threshold:
-            lastTransmissionTime = epoch - timeSinceLastTransmission
-            if lastTransmissionTime > self.config[listenername]['Last Transmission Time']:
+        if timeSinceLastTransaction > threshold:
+            lastTransactionTime = epoch - timeSinceLastTransaction
+            if lastTransactionTime > self.config[listenername]['Last Transaction Time']:
                 soundAlarm(listenerName)
-            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransmissionTime)""")
+            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransactionTime)""")
         pass
         
     def soundAlarm(self, listenerName=None, emailRecipients=None):
