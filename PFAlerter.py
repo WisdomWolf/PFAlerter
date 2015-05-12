@@ -10,6 +10,7 @@ from socket import gaierror
 import base64
 import string
 import pdb
+import time
 
 class PFAlert:
 
@@ -122,7 +123,7 @@ class PFAlert:
         
         if timeSinceLastTransaction > threshold:
             lastTransactionTime = epoch - timeSinceLastTransaction
-            if lastTransactionTime > self.config[listenername]['Last Transaction Time']:
+            if lastTransactionTime > self.config['listenername']['Last Transaction Time']:
                 soundAlarm(listenerName)
             writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransactionTime)""")
         pass
