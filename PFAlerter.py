@@ -23,6 +23,7 @@ class PFAlert:
                 ):
         self.config = ConfigParser()
         self.config.read(configFile)
+        self.file = configFile
         self.theurl = self.config['PF Listener']['url']
         self.serverUsername = self.config['PF Listener']['username']
         self.serverPassword = self.config['PF Listener']['password']
@@ -119,33 +120,43 @@ class PFAlert:
             #parse listenerName and timeSinceLastTransaction
             listenerName = listener['name']
             timeSinceLastTransaction = listener['TimeSinceLastTransaction']
-            self.thresholdCompare(listenerName, timeSinceLastTransaction, 300000)
+            self.thresholdCompare(listenerName, timeSinceLastTransaction, 300)
         
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
-        epoch = int(time.time()) * 1000
+        epoch = int(time.time())
+        timeSinceLastTransaction = int(timeSinceLastTransaction / 1000)
+        
+        try:
+            lastTransactionLogged = int(self.config[listenerName]['Last Transaction Time'])
+        except (KeyError, NameError):
+            print('No value found for', listenerName)
+            lastTransactionLogged = 1
         
         if timeSinceLastTransaction > threshold:
-            lastTransactionTime = epoch - timeSinceLastTransaction
-            try:
-                if lastTransactionTime > self.config[listenername]['Last Transaction Time']:
-                    self.soundAlarm(listenerName)
-            except (KeyError, NameError):
-                print('Value not found in config, sounding alarm!')
-                self.soundAlarm(listenerName)
+            print('Time since Last Transaction exceeds threshold!')
+            lastTransactionTime = int(epoch - timeSinceLastTransaction)
+            
+            if lastTransactionTime > lastTransactionLogged:
+                print('Sounding Alarm because last transaction time is new:', lastTransactionTime, lastTransactionLogged)
+                pdb.set_trace()
+                self.soundAlarm(listenerName, lastTransactionTime)
                 
-            self.writeToLog(str(listenerName) + " hasn't had a transaction since " + str(time.localtime((lastTransactionTime / 1000))))
+            self.writeToLog(str(listenerName) + " hasn't had a transaction since " + time.strftime('%m-%d-%Y %H:%M', time.localtime(lastTransactionTime)))
         
-    def soundAlarm(self, listenerName=None, emailRecipients=None):
+    def soundAlarm(self, listenerName, lastTransactionTime, emailRecipients=None):
         """Generates alert email when listener reports an unacceptable transaction time"""
-        pass
+        self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
+        with open(self.file, 'w') as configfile:
+            self.config.write(configfile)
+        print('\n***\nAlarm Sounded!\n***\n')
         
     def writeToLog(self, data, timestamp=None, log_file=None):
-        timestamp = timestamp or time.localtime(time.time())
+        timestamp = timestamp or time.strftime('%m-%d-%Y %H:%M')
         log_file = log_file or 'PFAlerter.log'
-        with codecs.open(log_file, 'w+', 'utf-8') as file:
-            file.write(str(timestamp) + str(data))
+        with codecs.open(log_file, 'a+', 'utf-8') as file:
+            file.write(str(timestamp) + ' - ' + str(data) + '\r\n')
         
 def pullJSONFromTextFile(fileIn):
     return open(fileIn).read()
@@ -176,7 +187,8 @@ def buildTestJSON(fileIn, fileOut, newElementKey=None):
     fileOut -- the file to direct results to
     """
     
-    data = getListenerList(open(fileIn).read())
+    data = open(fileIn).read()
+    testList = getListenerList(data)
     newElementKey = newElementKey or input('Enter name of new element key: ')
     
     for i, j in zip(testList, range(1, len(testList)+1)):
@@ -210,5 +222,5 @@ alertTest = PFAlert('config.ini')
 s = sched.scheduler(time.time, time.sleep)
 pdb.set_trace()
 while(True):
-    s.enter(10, 1, testJSON, argument=(alertTest, 'testJSON.txt')) #trailing comma is necessary because argument is a sequence
+    s.enter(10, 1, testJSON, argument=(alertTest, 'testJSON2.txt')) #trailing comma is necessary because argument is a sequence
     s.run()
