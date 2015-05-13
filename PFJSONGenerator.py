@@ -47,19 +47,18 @@ def jsonToTextFile(data, fileName):
     
 def lastTransactionCounter(fail=None):
     global timeSinceLastTransaction
-    if timeSinceLastTransaction < 300000:
-        timeSinceLastTransaction += (interval * 1000)
-    elif timeSinceLastTransaction >= 300000 and not fail:
+    if timeSinceLastTransaction >= 30000 and not fail:
         timeSinceLastTransaction = 1000
-
+    else:
+        timeSinceLastTransaction += (interval * 1000)
 def runTest():
     fail = False
-    if random.randint(0, 10) > 3:
+    if random.randint(0, 10) > 1:
         fail = True
     lastTransactionCounter(fail)
-    lastTransactionTime = int(time.time() * 1000 - timeSinceLastTransaction)
+    lastTransactionTime = int(time.time() - (timeSinceLastTransaction / 1000))
     buildTestJSON('tempJSON2.txt', 'testJSON2.txt', newElementValue=timeSinceLastTransaction)
-    print(timeSinceLastTransaction, '|', lastTransactionTime)
+    print(timeSinceLastTransaction, '|', lastTransactionTime, '|', fail)
     
 s = sched.scheduler(time.time, time.sleep)
 interval = 1

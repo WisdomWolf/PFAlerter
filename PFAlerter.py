@@ -37,6 +37,8 @@ class PFAlert:
         self.emailPassword = (base64.b64decode(self.config['Email']['senderPassword'])).decode()
         self.emailRecipients = self.config['Email']['receiverAddresses']
         self.FROM = self.config['Email']['from']
+        self.threshold = self.config['Settings']['threshold']
+        self.timerResolution = self.config['Settings']['interval']
         
     def sendEmail(self, subject=None, text=None):
         SUBJECT = subject or 'Python Test'
@@ -120,7 +122,7 @@ class PFAlert:
             #parse listenerName and timeSinceLastTransaction
             listenerName = listener['name']
             timeSinceLastTransaction = listener['TimeSinceLastTransaction']
-            self.thresholdCompare(listenerName, timeSinceLastTransaction, 300)
+            self.thresholdCompare(listenerName, timeSinceLastTransaction, int(self.threshold))
         
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
@@ -220,5 +222,5 @@ alertTest = PFAlert('config.ini')
 s = sched.scheduler(time.time, time.sleep)
 pdb.set_trace()
 while(True):
-    s.enter(10, 1, testJSON, argument=(alertTest, 'testJSON2.txt')) #trailing comma is necessary because argument is a sequence
+    s.enter(float(alertTest.timerResolution), 1, testJSON, argument=(alertTest, 'testJSON2.txt')) #trailing comma is necessary because argument is a sequence
     s.run()
