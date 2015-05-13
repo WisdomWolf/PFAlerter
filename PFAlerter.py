@@ -10,6 +10,7 @@ from socket import gaierror
 import base64
 import string
 import pdb
+import time
 
 class PFAlert:
 
@@ -94,36 +95,37 @@ class PFAlert:
     def pullJSON(self):
         """pulls the JSON data and puts it into Python object format"""
         
-        req = urllib.request.Request(self.theurl, None, HEADERS)
+        req = urllib.request.Request(self.theurl, None, PFAlert.HEADERS)
         response = urllib.request.urlopen(req)
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
         
-    def JSONTest(self):    
-        self.buildRequester()
-        jsonData = self.pullJSON()
-        jsonToTextFile(jsonData)
-        listenerStr = "Listeners: \r\n----------\r\n"
+    def JSONTest(self, jsonSourceFile=None):    
+        #self.buildRequester()
+        #jsonData = self.pullJSON()
+        #jsonToTextFile(jsonData)
+        jsonData = pullJSONFromTextFile(jsonSourceFile)
         listenerList = jsonData['ListenersContainer']['Listener']
-        listenerStr += pullJSONValue('name', listenerList)
-        print(listenerStr)
+        self.TSLTIterator(listenerList)
         
     def TSLTIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
         
-        for listner in listnerList:
-            #parse listenerName and timeSinceLastTransmission
-            self.thresholdCompare(listenerName, timeSinceLastTransmission)
+        for listener in listenerList:
+            #parse listenerName and timeSinceLastTransaction
+            listenerName = listener['name']
+            timeSinceLastTransaction = listener['TimeSinceLastTransaction']
+            self.thresholdCompare(listenerName, timeSinceLastTransaction, 300000)
         
-    def thresholdCompare(self, listenerName, timeSinceLastTransmission, threshold):
+    def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
-        if timeSinceLastTransmission > threshold:
-            lastTransmissionTime = epoch - timeSinceLastTransmission
-            if lastTransmissionTime > self.config[listenername]['Last Transmission Time']:
+        if timeSinceLastTransaction > threshold:
+            lastTransactionTime = epoch - timeSinceLastTransaction
+            if lastTransactionTime > self.config['listenername']['Last Transaction Time']:
                 soundAlarm(listenerName)
-            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransmissionTime)""")
+            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransactionTime)""")
         pass
         
     def soundAlarm(self, listenerName=None, emailRecipients=None):
@@ -131,13 +133,14 @@ class PFAlert:
         pass
         
     def writeToLog(self, data, timestamp=None, log_file=None):
-        timestamp = timestamp or #current time
+        timestamp = timestamp #or current time
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'w+', 'utf-8') as file:
             file.write(timestamp, data)
         
 def pullJSONFromTextFile(fileIn):
     return open(fileIn).read()
+
     
 def jsonToTextFile(data, fileName):
     """sends the json data to text file with 'pretty printing'"""
@@ -163,15 +166,14 @@ def buildTestJSON(fileIn, fileOut):
     jsonToTextFile(data, fileOut)
     return
     
-def pullJSONValue(key, list):
-    """pulls a specific element from the JSON list"""
-    keyStr = ""
-    for i, j in zip(list, range(1, len(list)+1)):
-        if j < 10:
-            keyStr += str(j) + ".  " + str(i[key]) + "\r\n"
-        else:
-            keyStr += str(j) + ". " + str(i[key]) + "\r\n"
-    return keyStr
+def pullJSONValues(key, list):
+    """returns a list from the JSON of the element specified"""
+    elementList = []
+    for i in list:
+        print(i[key])
+        elementList.append(i[key])
+    
+    return elementList
     
 #sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
