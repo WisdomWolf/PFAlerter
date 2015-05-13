@@ -6,11 +6,19 @@ import json
 import string
 import codecs
 import random
+from configparser import ConfigParser
 
 
 def getListenerList(data):
     data = json.loads(data)
     return data, data['ListenersContainer']['Listener']
+    
+def importConfigValues():
+    config = ConfigParser()
+    config.read('C:/Users/Public/Documents/config.ini')
+    global threshold
+    threshold = int(config['Settings']['threshold'] * 1000)
+    timerResolution = config['Settings']['interval']
     
 def buildTestJSON(fileIn, fileOut, newElementKey=None, newElementValue=None):
     """generates JSON txt file adding the key and values specified by the user
@@ -47,7 +55,7 @@ def jsonToTextFile(data, fileName):
     
 def lastTransactionCounter(fail=None):
     global timeSinceLastTransaction
-    if timeSinceLastTransaction >= 300000 and not fail:
+    if timeSinceLastTransaction >= threshold and not fail:
         timeSinceLastTransaction = 1000
     else:
         timeSinceLastTransaction += (interval * 1000)
@@ -63,6 +71,7 @@ def runTest():
 s = sched.scheduler(time.time, time.sleep)
 interval = 1
 timeSinceLastTransaction = 1000
+importConfigValues()
 while(True):
     s.enter(interval, 1, runTest)
     s.run()

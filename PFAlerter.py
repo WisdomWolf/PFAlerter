@@ -166,7 +166,7 @@ class PFAlert:
         winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
         for listenerName in listenerNames:
             self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
-            print('\n***\nAlarm on', listenerName, '\n***\n')
+            print('***\nAlarm on', listenerName, '\n***')
         with open(self.file, 'w') as configfile:
             self.config.write(configfile)
         
