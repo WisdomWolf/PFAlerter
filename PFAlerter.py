@@ -1,7 +1,15 @@
 #! python3
-import os, sys, json, codecs, string
-import urllib.request, smtplib, base64
-import pdb, time, sched
+import os 
+import sys
+import json
+import codecs
+import string
+import urllib.request
+import smtplib
+import base64
+import pdb
+import time
+import sched
 from configparser import ConfigParser
 from socket import gaierror
 
@@ -138,7 +146,12 @@ def pullJSONFromTextFile(fileIn):
 
     
 def jsonToTextFile(data, fileName):
-    """sends the json data to text file with 'pretty printing'"""
+    """sends the json data to text file with 'pretty printing'
+    
+    Keyword arguments:
+    data -- the json object to parse
+    fileName -- the file to save results to
+    """
     
     data = json.dumps(data, sort_keys=True, indent=4)
     with codecs.open(fileName, 'w+', 'utf-8') as save_file:
@@ -146,7 +159,13 @@ def jsonToTextFile(data, fileName):
     return
     
 def buildTestJSON(fileIn, fileOut):
-    """gnenerates JSON txt file adding the key and values specified by the user"""
+    """gnenerates JSON txt file adding the key and values specified by the user
+    
+    Keyword arguments:
+    fileIn -- the file containing JSON data to be read
+    fileOut -- the file to direct results to
+    """
+    
     data = open(fileIn).read()
     data = json.loads(data)
     testList = data['ListenersContainer']['Listener']
