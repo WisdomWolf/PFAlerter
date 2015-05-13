@@ -60,7 +60,8 @@ def lastTransactionCounter(fail=None):
         timeSinceLastTransaction = 1000
     else:
         timeSinceLastTransaction += (interval * 1000)
-def runTest():
+        
+def runGenerator():
     fail = False
     if random.randint(0, 10) > 1:
         fail = True
@@ -69,10 +70,15 @@ def runTest():
     buildTestJSON('tempJSON2.txt', 'testJSON2.txt', newElementValue=timeSinceLastTransaction)
     print(timeSinceLastTransaction, '|', lastTransactionTime, '|', fail)
     
-s = sched.scheduler(time.time, time.sleep)
-interval = 1
-timeSinceLastTransaction = 1000
-importConfigValues()
-while(True):
-    s.enter(interval, 1, runTest)
-    s.run()
+def prepareTest():
+    global s, interval, timeSinceLastTransaction
+    s = sched.scheduler(time.time, time.sleep)
+    interval = 1
+    timeSinceLastTransaction = 1000
+    importConfigValues()
+    
+def runTest():
+        s.enter(interval, 1, runGenerator)
+        s.run()
+    
+prepareTest()

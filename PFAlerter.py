@@ -108,13 +108,23 @@ class PFAlert:
         
         return json.loads(str_response)
         
-    def JSONTest(self, jsonSourceFile=None):    
+    def testJSON(self, file=None):
+        """test json information against threshold
+        
+        Keyword arguments:
+        file -- JSON information file (Optional)
+        """
+        
         #self.buildRequester()
         #jsonData = self.pullJSON()
         #jsonToTextFile(jsonData)
-        jsonData = pullJSONFromTextFile(jsonSourceFile)
-        listenerList = jsonData['ListenersContainer']['Listener']
-        self.TSLTIterator(listenerList)
+        data = pullJSONFromTextFile(file)
+        listenerList = self.getListenerList(data)
+        self.listenersIterator(listenerList)
+        
+    def getListenerList(data):
+        data = json.loads(data)
+        return data['ListenersContainer']['Listener']
         
     def listenersIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations.
@@ -200,7 +210,6 @@ class PFAlert:
         
 def pullJSONFromTextFile(fileIn):
     return open(fileIn).read()
-
     
 def jsonToTextFile(data, fileName):
     """sends the json data to text file with 'pretty printing'
@@ -214,10 +223,6 @@ def jsonToTextFile(data, fileName):
     with codecs.open(fileName, 'w+', 'utf-8') as save_file:
         save_file.write(str(data))
     return
-    
-def getListenerList(data):
-    data = json.loads(data)
-    return data['ListenersContainer']['Listener']
     
 def buildTestJSON(fileIn, fileOut, newElementKey=None):
     """generates JSON txt file adding the key and values specified by the user
@@ -248,18 +253,6 @@ def pullJSONValues(key, list):
         elementList.append(i[key])
     
     return elementList
-
-def testJSON(alert, file):
-    """test information from file against threshold
-    
-    Keyword arguments:
-    alert -- PFAlert object containing test methods and values
-    file -- JSON information file
-    """
-    
-    data = pullJSONFromTextFile(file)
-    listenerList = getListenerList(data)
-    alert.listenersIterator(listenerList)
     
 #sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
@@ -270,5 +263,5 @@ s = sched.scheduler(time.time, time.sleep)
 #pdb.set_trace()
 print('Running...\n')
 while(True):
-    s.enter(float(alertTest.timerResolution), 1, testJSON, argument=(alertTest, 'testJSON2.txt'))
+    s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=(alertTest, 'testJSON2.txt'))
     s.run()
