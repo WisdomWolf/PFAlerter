@@ -1,16 +1,9 @@
 #! python3
-import os
-import sys
-import json
-import codecs
-import urllib.request
-import smtplib
+import os, sys, json, codecs, string
+import urllib.request, smtplib, base64
+import pdb, time, sched
 from configparser import ConfigParser
 from socket import gaierror
-import base64
-import string
-import pdb
-import time
 
 class PFAlert:
 
@@ -94,6 +87,8 @@ class PFAlert:
 
     def pullJSON(self):
         """pulls the JSON data and puts it into Python object format"""
+        
+        self.buildRequester()
         
         req = urllib.request.Request(self.theurl, None, PFAlert.HEADERS)
         response = urllib.request.urlopen(req)
@@ -180,4 +175,8 @@ def pullJSONValues(key, list):
   #  save_file.write(listenerStr)
 
 alertTest = PFAlert('config.ini')
+s = sched.scheduler(time.time, time.sleep)
+#while(True):
+    #s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
+    #s.run()
 pdb.set_trace()
