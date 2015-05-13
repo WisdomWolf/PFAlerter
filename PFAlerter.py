@@ -133,13 +133,11 @@ class PFAlert:
     def writeToLog(self, data, timestamp=None, log_file=None):
         timestamp = timestamp or #current time
         log_file = log_file or 'PFAlerter.log'
-        with codecs.open(log_file, 'utf-8') as file:
+        with codecs.open(log_file, 'w+', 'utf-8') as file:
             file.write(timestamp, data)
         
 def pullJSONFromTextFile(fileIn):
-    data = open(fileIn).read()
-        
-    return data
+    return open(fileIn).read()
     
 def jsonToTextFile(data, fileName):
     """sends the json data to text file with 'pretty printing'"""
