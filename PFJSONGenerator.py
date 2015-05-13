@@ -47,7 +47,7 @@ def jsonToTextFile(data, fileName):
     
 def lastTransactionCounter(fail=None):
     global timeSinceLastTransaction
-    if timeSinceLastTransaction >= 30000 and not fail:
+    if timeSinceLastTransaction >= 300000 and not fail:
         timeSinceLastTransaction = 1000
     else:
         timeSinceLastTransaction += (interval * 1000)

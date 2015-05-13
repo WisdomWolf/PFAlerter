@@ -1,5 +1,8 @@
 #! python3
-import sched, time, codecs, winsound
+import sched
+import time
+import codecs
+import winsound
 import pythoncom
 import win32serviceutil
 import win32service

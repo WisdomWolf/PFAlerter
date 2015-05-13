@@ -10,6 +10,7 @@ import base64
 import pdb
 import time
 import sched
+import winsound
 from configparser import ConfigParser
 from socket import gaierror
 
@@ -118,17 +119,28 @@ class PFAlert:
     def listenersIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
         
+        alarmList = {}
+        listenerName = ''
+        lastTransactionTime = 0
+        
         for listener in listenerList:
             #parse listenerName and timeSinceLastTransaction
             listenerName = listener['name']
             timeSinceLastTransaction = listener['TimeSinceLastTransaction']
-            self.thresholdCompare(listenerName, timeSinceLastTransaction, int(self.threshold))
+            a, t = self.thresholdCompare(listenerName, timeSinceLastTransaction, int(self.threshold))
+            if a:
+                alarmList[a] = t
+        
+        if alarmList:
+            self.soundAlarm(alarmList, lastTransactionTime)
         
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
+        alarmer = None
         epoch = int(time.time())
         timeSinceLastTransaction = int(timeSinceLastTransaction / 1000)
+        lastTransactionTime = 0
         
         try:
             lastTransactionLogged = int(self.config[listenerName]['Last Transaction Time'])
@@ -140,17 +152,23 @@ class PFAlert:
             lastTransactionTime = int(epoch - timeSinceLastTransaction)
             
             if lastTransactionTime > lastTransactionLogged:
-                print('Sounding Alarm because last transaction time is new:', lastTransactionTime, lastTransactionLogged)
-                self.soundAlarm(listenerName, lastTransactionTime)
+                print('Sounding Alarm for:', listenerName, lastTransactionTime, lastTransactionLogged)
+                alarmer = listenerName
                 
             self.writeToLog(str(listenerName) + " hasn't had a transaction since " + time.strftime('%m-%d-%Y %H:%M', time.localtime(lastTransactionTime)))
+            
+        return alarmer, lastTransactionTime
         
-    def soundAlarm(self, listenerName, lastTransactionTime, emailRecipients=None):
+    def soundAlarm(self, listenerNames, lastTransactionTime, emailRecipients=None):
         """Generates alert email when listener reports an unacceptable transaction time"""
-        self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
+        
+        print('\n***\nAlarm Sounded!\n***\n')
+        winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
+        for listenerName in listenerNames:
+            self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
+            print('\n***\nAlarm on', listenerName, '\n***\n')
         with open(self.file, 'w') as configfile:
             self.config.write(configfile)
-        print('\n***\nAlarm Sounded!\n***\n')
         
     def writeToLog(self, data, timestamp=None, log_file=None):
         timestamp = timestamp or time.strftime('%m-%d-%Y %H:%M')
@@ -218,9 +236,10 @@ def testJSON(alert, file):
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
-alertTest = PFAlert('config.ini')
+alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
 s = sched.scheduler(time.time, time.sleep)
-pdb.set_trace()
+#pdb.set_trace()
+print('Running...\n')
 while(True):
-    s.enter(float(alertTest.timerResolution), 1, testJSON, argument=(alertTest, 'testJSON2.txt')) #trailing comma is necessary because argument is a sequence
+    s.enter(float(alertTest.timerResolution), 1, testJSON, argument=(alertTest, 'testJSON2.txt'))
     s.run()
