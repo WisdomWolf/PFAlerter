@@ -158,17 +158,19 @@ def jsonToTextFile(data, fileName):
         save_file.write(str(data))
     return
     
+def getListenerList(data):
+    data = json.loads(data)
+    return data['ListenersContainer']['Listener']
+    
 def buildTestJSON(fileIn, fileOut, newElementKey=None):
-    """gnenerates JSON txt file adding the key and values specified by the user
+    """generates JSON txt file adding the key and values specified by the user
     
     Keyword arguments:
     fileIn -- the file containing JSON data to be read
     fileOut -- the file to direct results to
     """
     
-    data = open(fileIn).read()
-    data = json.loads(data)
-    testList = data['ListenersContainer']['Listener']
+    data = getListenerList(open(fileIn).read())
     newElementKey = newElementKey or input('Enter name of new element key: ')
     
     for i, j in zip(testList, range(1, len(testList)+1)):
