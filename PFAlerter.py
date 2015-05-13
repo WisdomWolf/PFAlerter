@@ -124,6 +124,8 @@ class PFAlert:
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
+        epoch = int(time.time())
+        
         if timeSinceLastTransaction > threshold:
             lastTransactionTime = epoch - timeSinceLastTransaction
             if lastTransactionTime > self.config['listenername']['Last Transaction Time']:
@@ -198,6 +200,6 @@ def pullJSONValues(key, list):
 alertTest = PFAlert('config.ini')
 s = sched.scheduler(time.time, time.sleep)
 #while(True):
-    #s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
+    s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
     #s.run()
 pdb.set_trace()
