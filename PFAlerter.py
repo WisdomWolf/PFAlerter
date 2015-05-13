@@ -121,7 +121,6 @@ class PFAlert:
         
         alarmList = {}
         listenerName = ''
-        lastTransactionTime = 0
         
         for listener in listenerList:
             #parse listenerName and timeSinceLastTransaction
@@ -132,7 +131,7 @@ class PFAlert:
                 alarmList[a] = t
         
         if alarmList:
-            self.soundAlarm(alarmList, lastTransactionTime)
+            self.soundAlarm(alarmList)
         
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
@@ -159,16 +158,16 @@ class PFAlert:
             
         return alarmer, lastTransactionTime
         
-    def soundAlarm(self, listenerNames, lastTransactionTime, emailRecipients=None):
+    def soundAlarm(self, listenerNames, emailRecipients=None):
         """Generates alert email when listener reports an unacceptable transaction time"""
         
         print('\n***\nAlarm Sounded!\n***\n')
         winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
-        for listenerName in listenerNames:
+        for listenerName, lastTransactionTime in listenerNames.items():
             self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
             print('***\nAlarm on', listenerName, '\n***')
-        with open(self.file, 'w') as configfile:
-            self.config.write(configfile)
+            with open(self.file, 'w') as configfile:
+                self.config.write(configfile)
         
     def writeToLog(self, data, timestamp=None, log_file=None):
         timestamp = timestamp or time.strftime('%m-%d-%Y %H:%M')

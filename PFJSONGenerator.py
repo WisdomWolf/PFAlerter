@@ -17,7 +17,8 @@ def importConfigValues():
     config = ConfigParser()
     config.read('C:/Users/Public/Documents/config.ini')
     global threshold
-    threshold = int(config['Settings']['threshold'] * 1000)
+    threshold = int(config['Settings']['threshold']) * 1000
+    print('Threshold is', threshold)
     timerResolution = config['Settings']['interval']
     
 def buildTestJSON(fileIn, fileOut, newElementKey=None, newElementValue=None):
