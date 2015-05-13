@@ -158,7 +158,7 @@ def jsonToTextFile(data, fileName):
         save_file.write(str(data))
     return
     
-def buildTestJSON(fileIn, fileOut):
+def buildTestJSON(fileIn, fileOut, newElementKey=None):
     """gnenerates JSON txt file adding the key and values specified by the user
     
     Keyword arguments:
@@ -169,7 +169,7 @@ def buildTestJSON(fileIn, fileOut):
     data = open(fileIn).read()
     data = json.loads(data)
     testList = data['ListenersContainer']['Listener']
-    newElementKey = input('Enter name of new element key: ')
+    newElementKey = newElementKey or input('Enter name of new element key: ')
     
     for i, j in zip(testList, range(1, len(testList)+1)):
         print('\r\n', j, ".", i['name'])
