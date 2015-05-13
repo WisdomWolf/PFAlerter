@@ -128,10 +128,14 @@ class PFAlert:
         
         if timeSinceLastTransaction > threshold:
             lastTransactionTime = epoch - timeSinceLastTransaction
-            if lastTransactionTime > self.config['listenername']['Last Transaction Time']:
-                soundAlarm(listenerName)
-            writeToLog(str(listenerName) + " hasn't had a transaction since " + time.localtime((lastTransactionTime / 1000)))
-        pass
+            try:
+                if lastTransactionTime > self.config[listenername]['Last Transaction Time']:
+                    self.soundAlarm(listenerName)
+            except (KeyError, NameError):
+                print('Value not found in config, sounding alarm!')
+                self.soundAlarm(listenerName)
+                
+            self.writeToLog(str(listenerName) + " hasn't had a transaction since " + str(time.localtime((lastTransactionTime / 1000))))
         
     def soundAlarm(self, listenerName=None, emailRecipients=None):
         """Generates alert email when listener reports an unacceptable transaction time"""
@@ -141,7 +145,7 @@ class PFAlert:
         timestamp = timestamp or time.localtime(time.time())
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'w+', 'utf-8') as file:
-            file.write(timestamp, data)
+            file.write(str(timestamp) + str(data))
         
 def pullJSONFromTextFile(fileIn):
     return open(fileIn).read()
