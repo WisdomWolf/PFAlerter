@@ -135,12 +135,10 @@ class PFAlert:
             lastTransactionLogged = 1
         
         if timeSinceLastTransaction > threshold:
-            print('Time since Last Transaction exceeds threshold!')
             lastTransactionTime = int(epoch - timeSinceLastTransaction)
             
             if lastTransactionTime > lastTransactionLogged:
                 print('Sounding Alarm because last transaction time is new:', lastTransactionTime, lastTransactionLogged)
-                pdb.set_trace()
                 self.soundAlarm(listenerName, lastTransactionTime)
                 
             self.writeToLog(str(listenerName) + " hasn't had a transaction since " + time.strftime('%m-%d-%Y %H:%M', time.localtime(lastTransactionTime)))
