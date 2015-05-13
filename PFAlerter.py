@@ -112,7 +112,7 @@ class PFAlert:
         listenerList = jsonData['ListenersContainer']['Listener']
         self.TSLTIterator(listenerList)
         
-    def TSLTIterator(self, listenerList):
+    def listenersIterator(self, listenerList):
         """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
         
         for listener in listenerList:
@@ -124,13 +124,13 @@ class PFAlert:
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
         """Compares transaction time to threshold and sounds alarm if necessary."""
         
-        epoch = int(time.time())
+        epoch = int(time.time()) * 1000
         
         if timeSinceLastTransaction > threshold:
             lastTransactionTime = epoch - timeSinceLastTransaction
             if lastTransactionTime > self.config['listenername']['Last Transaction Time']:
                 soundAlarm(listenerName)
-            writeToLog(str(listenerName) + " hasn't had a transaction since " """+ human readable formatted(lastTransactionTime)""")
+            writeToLog(str(listenerName) + " hasn't had a transaction since " + time.localtime((lastTransactionTime / 1000)))
         pass
         
     def soundAlarm(self, listenerName=None, emailRecipients=None):
@@ -138,7 +138,7 @@ class PFAlert:
         pass
         
     def writeToLog(self, data, timestamp=None, log_file=None):
-        timestamp = timestamp #or current time
+        timestamp = timestamp or time.localtime(time.time())
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'w+', 'utf-8') as file:
             file.write(timestamp, data)
@@ -192,6 +192,11 @@ def pullJSONValues(key, list):
         elementList.append(i[key])
     
     return elementList
+
+def testJSON(alert, file):
+    data = pullJSONFromTextFile(file)
+    listenerList = getListenerList(data)
+    alert.listenersIterator(listenerList)
     
 #sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
@@ -199,7 +204,7 @@ def pullJSONValues(key, list):
 
 alertTest = PFAlert('config.ini')
 s = sched.scheduler(time.time, time.sleep)
-#while(True):
-    s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
-    #s.run()
 pdb.set_trace()
+while(True):
+    s.enter(10, 1, testJSON, argument=(alertTest, 'testJSON.txt')) #trailing comma is necessary because argument is a sequence
+    s.run()
