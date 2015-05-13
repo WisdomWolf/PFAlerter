@@ -117,7 +117,11 @@ class PFAlert:
         self.TSLTIterator(listenerList)
         
     def listenersIterator(self, listenerList):
-        """Loops over all listeners and calls thresholdCompare for determining threshold violations."""
+        """Loops over all listeners and calls thresholdCompare for determining threshold violations.
+        
+        Keyword arguments:
+        listenerList -- list of all listeners to be used for comparison
+        """
         
         alarmList = {}
         listenerName = ''
@@ -134,7 +138,13 @@ class PFAlert:
             self.soundAlarm(alarmList)
         
     def thresholdCompare(self, listenerName, timeSinceLastTransaction, threshold):
-        """Compares transaction time to threshold and sounds alarm if necessary."""
+        """Compares transaction time to threshold and sounds alarm if necessary.
+        
+        Keyword arguments:
+        listenerName -- the name of the listener being compared
+        timeSinceLastTransaction -- time in milliseconds since last transaction completed
+        threshold -- time in seconds representing maximum acceptable time since last transaction completed
+        """
         
         alarmer = None
         epoch = int(time.time())
@@ -159,7 +169,12 @@ class PFAlert:
         return alarmer, lastTransactionTime
         
     def soundAlarm(self, listenerNames, emailRecipients=None):
-        """Generates alert email when listener reports an unacceptable transaction time"""
+        """Generates alert email when listener reports an unacceptable transaction time.
+        
+        Keyword arguments:
+        listenerNames -- dictionary containing listeners that haven't transacted in an acceptable timeframe
+        emailRecipients -- addresses to send alert to (Optional)
+        """
         
         print('\n***\nAlarm Sounded!\n***\n')
         winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
@@ -170,6 +185,14 @@ class PFAlert:
                 self.config.write(configfile)
         
     def writeToLog(self, data, timestamp=None, log_file=None):
+        """Writes important information to log file.
+        
+        Keyword arguments:
+        data -- the information to write
+        timestamp -- time of event occurence (Default %m-%d-%Y %H:%M)
+        log_file -- the file to be written (Default PFAlerter.log)
+        """
+        
         timestamp = timestamp or time.strftime('%m-%d-%Y %H:%M')
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'a+', 'utf-8') as file:
@@ -227,6 +250,13 @@ def pullJSONValues(key, list):
     return elementList
 
 def testJSON(alert, file):
+    """test information from file against threshold
+    
+    Keyword arguments:
+    alert -- PFAlert object containing test methods and values
+    file -- JSON information file
+    """
+    
     data = pullJSONFromTextFile(file)
     listenerList = getListenerList(data)
     alert.listenersIterator(listenerList)
