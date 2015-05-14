@@ -13,6 +13,7 @@ import sched
 import winsound
 from configparser import ConfigParser
 from socket import gaierror
+from email.message import Message
 
 class PFAlert:
 
@@ -45,6 +46,13 @@ class PFAlert:
         SUBJECT = subject or 'Python Test'
         TEXT = text or 'Testing sending message with python'
         
+        m = Message()
+        m['From'] = self.FROM
+        m['To'] = self.emailRecipients
+        m['X-Priority'] = '1'
+        m['Subject'] = SUBJECT
+        m.set_payload(TEXT)
+        
         #Prepare actual message
         message = '\r\n'.join(['To: %s' % self.emailRecipients, 'From: %s' % self.FROM, 'Subject: %s' % SUBJECT, '', TEXT])
         
@@ -65,7 +73,7 @@ class PFAlert:
             os._exit(0)
         
         try:
-            server.sendmail(self.FROM, self.emailRecipients, message)
+            server.sendmail(self.FROM, self.emailRecipients, m.as_string())
             print("Sucessfully sent the mail")
         #except smtplib.SMTPDataError:
         #    print("Failed to send mail.  Possible permissions error.")
@@ -262,6 +270,6 @@ alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
 s = sched.scheduler(time.time, time.sleep)
 #pdb.set_trace()
 print('Running...\n')
-while(True):
-    s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=(alertTest, 'testJSON2.txt'))
-    s.run()
+# while(True):
+    # s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
+    # s.run()
