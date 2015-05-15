@@ -37,21 +37,25 @@ class PFAlert:
             os._exit(0)
         self.emailUser = self.config['Email']['senderAddress']
         self.emailPassword = (base64.b64decode(self.config['Email']['senderPassword'])).decode()
-        self.emailRecipients = self.config['Email']['receiverAddresses']
+        recipients = self.config['Email']['receiverAddresses']
+        self.emailRecipients = recipients.split(';')
         self.FROM = self.config['Email']['from']
         self.threshold = self.config['Settings']['threshold']
         self.timerResolution = self.config['Settings']['interval']
         
     def sendEmail(self, subject=None, text=None):
-        SUBJECT = subject or 'Python Test'
-        TEXT = text or 'Testing sending message with python'
+        SUBJECT = subject or 'Python Priority Test'
+        TEXT = text or 'Sending this message with high priority because reasons.'
         
-        m = Message()
-        m['From'] = self.FROM
-        m['To'] = self.emailRecipients
-        m['X-Priority'] = '1'
-        m['Subject'] = SUBJECT
-        m.set_payload(TEXT)
+        msg = Message()
+        msg['From'] = self.FROM
+        # msg['To'] = self.emailRecipients
+        msg['To'] = ", ".join(self.emailRecipients)
+        msg['X-Priority'] = '1'
+        msg['Subject'] = SUBJECT
+        msg.set_payload(TEXT)
+        
+        pdb.set_trace()
         
         #Prepare actual message
         message = '\r\n'.join(['To: %s' % self.emailRecipients, 'From: %s' % self.FROM, 'Subject: %s' % SUBJECT, '', TEXT])
@@ -73,7 +77,10 @@ class PFAlert:
             os._exit(0)
         
         try:
-            server.sendmail(self.FROM, self.emailRecipients, m.as_string())
+            failures = server.sendmail(self.FROM, self.emailRecipients, msg.as_string())
+            if failures:
+                for x in failures:
+                    print(x)
             print("Sucessfully sent the mail")
         #except smtplib.SMTPDataError:
         #    print("Failed to send mail.  Possible permissions error.")
@@ -261,6 +268,10 @@ def pullJSONValues(key, list):
         elementList.append(i[key])
     
     return elementList
+    
+def sendEmail():
+    """convenience method for accessing object's sendMail method"""
+    alertTest.sendEmail()
     
 #sendEmail()
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
