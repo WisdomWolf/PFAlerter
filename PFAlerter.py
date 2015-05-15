@@ -206,6 +206,9 @@ class PFAlert:
         for listenerName, lastTransactionTime in listenerNames.items():
             self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
             print('***\nAlarm on', listenerName, '\n***')
+            subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + str(lastTransactionTime)
+            body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
+            self.sendEmail(subject, body)
             with open(self.file, 'w') as configfile:
                 self.config.write(configfile)
         
@@ -281,6 +284,6 @@ alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
 s = sched.scheduler(time.time, time.sleep)
 #pdb.set_trace()
 print('Running...\n')
-# while(True):
-    # s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
-    # s.run()
+while(True):
+    s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
+    s.run()
