@@ -55,8 +55,6 @@ class PFAlert:
         msg['Subject'] = SUBJECT
         msg.set_payload(TEXT)
         
-        pdb.set_trace()
-        
         #Prepare actual message
         message = '\r\n'.join(['To: %s' % self.emailRecipients, 'From: %s' % self.FROM, 'Subject: %s' % SUBJECT, '', TEXT])
         
@@ -137,7 +135,7 @@ class PFAlert:
         listenerList = self.getListenerList(data)
         self.listenersIterator(listenerList)
         
-    def getListenerList(data):
+    def getListenerList(self, data):
         data = json.loads(data)
         return data['ListenersContainer']['Listener']
         
