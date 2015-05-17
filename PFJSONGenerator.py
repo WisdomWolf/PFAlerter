@@ -67,7 +67,7 @@ def runGenerator():
         fail = True
     lastTransactionCounter(fail)
     lastTransactionTime = int(time.time() - (timeSinceLastTransaction / 1000))
-    buildTestJSON('tempJSON2.txt', 'testJSON2.txt', newElementValue=timeSinceLastTransaction)
+    buildTestJSON('tempJSON2.txt', 'C:/Users/Public/Documents/testJSON2.txt', newElementValue=timeSinceLastTransaction)
     print(timeSinceLastTransaction, '|', lastTransactionTime, '|', fail)
     
 def prepareTest():
@@ -82,3 +82,5 @@ def runTest():
         s.run()
     
 prepareTest()
+while(True):
+    runTest()
