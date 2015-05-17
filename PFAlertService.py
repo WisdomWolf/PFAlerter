@@ -9,11 +9,12 @@ import win32service
 import win32event
 import servicemanager
 import socket
+from PFAlerter import PFAlert
 
 
 class AppServerSvc (win32serviceutil.ServiceFramework):
     _svc_name_ = "PFAlertService"
-    _svc_display_name_ = "Python Test Alert Service"
+    _svc_display_name_ = "Pilot Fish Alert Service"
     s = sched.scheduler(time.time, time.sleep)
     isAlive = True
 
@@ -34,25 +35,11 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         self.main()
 
     def main(self):
-        while (time.time() < 1430179200 and self.isAlive):
-            self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
+        self.alerter = PFAlert('C:/Users/Public/Documents/config.ini')
+        while (self.isAlive):
+            #self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
+            self.s.enter(float(self.alerter.timerResolution), 1, self.alerter.testJSON, argument=('testJSON2.txt',))
             self.s.run()
 
 if __name__ == '__main__':
     win32serviceutil.HandleCommandLine(AppServerSvc)
-
-def test_time(a=5):
-    compareTime = get_compare_time()
-    print('Comparing current time', int(time.time()))
-    if int(time.time()) > (int(compareTime) + (a * 60)):
-        print('its been too long since last compare:', compareTime)
-        winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
-    else:
-        print('All good.  Last compare:', compareTime)
-        
-def get_compare_time():
-    with codecs.open("C:/Users/Public/Documents/time.txt", 'r', 'utf-8') as file:
-        result = ''
-        for line in file:
-            result = line
-        return result

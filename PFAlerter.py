@@ -191,20 +191,20 @@ class PFAlert:
             
         return alarmer, lastTransactionTime
         
-    def soundAlarm(self, listenerNames, emailRecipients=None):
+    def soundAlarm(self, listenerAlarmMap, emailRecipients=None):
         """Generates alert email when listener reports an unacceptable transaction time.
         
         Keyword arguments:
-        listenerNames -- dictionary containing listeners that haven't transacted in an acceptable timeframe
+        listenerAlarmMap -- dictionary containing listeners that haven't transacted in an acceptable timeframe
         emailRecipients -- addresses to send alert to (Optional)
         """
         
         print('\n***\nAlarm Sounded!\n***\n')
         winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
-        for listenerName, lastTransactionTime in listenerNames.items():
+        for listenerName, lastTransactionTime in listenerAlarmMap.items():
             self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
             print('***\nAlarm on', listenerName, '\n***')
-            subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + str(lastTransactionTime)
+            subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(lastTransactionTime))
             body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
             self.sendEmail(subject, body)
             with open(self.file, 'w') as configfile:
@@ -219,7 +219,7 @@ class PFAlert:
         log_file -- the file to be written (Default PFAlerter.log)
         """
         
-        timestamp = timestamp or time.strftime('%m-%d-%Y %H:%M')
+        timestamp = timestamp or time.strftime('%c')
         log_file = log_file or 'PFAlerter.log'
         with codecs.open(log_file, 'a+', 'utf-8') as file:
             file.write(str(timestamp) + ' - ' + str(data) + '\r\n')
@@ -278,10 +278,10 @@ def sendEmail():
 #with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
   #  save_file.write(listenerStr)
 
-alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
-s = sched.scheduler(time.time, time.sleep)
+# alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
+# s = sched.scheduler(time.time, time.sleep)
 #pdb.set_trace()
-print('Running...\n')
-while(True):
-    s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
-    s.run()
+# print('Running...\n')
+# while(True):
+    # s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
+    # s.run()
