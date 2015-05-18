@@ -213,8 +213,6 @@ class PFAlert:
             print('Not playing sound file because reasons')
         print('\n***\nAlarm Sounded!\n***\n')
         
-        pdb.set_trace()
-        
         if len(listenerAlarmMap) > 5:
             minItems = round(len(listenerAlarmMap) / 5)
             mapLists = list(split_seq(listenerAlarmMap, minItems))
