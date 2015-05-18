@@ -9,6 +9,7 @@ import win32service
 import win32event
 import servicemanager
 import socket
+from tkinter import messagebox
 from PFAlerter import PFAlert
 
 
@@ -38,6 +39,8 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
     def main(self):
         self.alerter = PFAlert('C:/Users/Public/Documents/config.ini')
         while self.isAlive:
+            if self.alerter.killed:
+                messagebox.showinfo(title='Critical Error', message='PFAlert service has died.')
             #self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
             self.s.enter(float(self.alerter.timerResolution), 1, self.alerter.testJSON, argument=('C:/Users/Public/Documents/testJSON2.txt',))
             self.s.run()

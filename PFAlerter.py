@@ -45,6 +45,7 @@ class PFAlert:
         self.threshold = self.config['Settings']['threshold']
         self.timerResolution = self.config['Settings']['interval']
         self.server = self.prepareSMTPServer()
+        self.killed = False
         
     def prepareSMTPServer(self):
         try:
@@ -71,6 +72,8 @@ class PFAlert:
         except smtplib.SMTPServerDisconnected:
             self.writeToLog('SMTP Server disconnected unexpectedly')
             
+        self.killed = True
+        time.sleep(5)
         os._exit(0)
         
     def sendEmail(self, subject=None, text=None):
@@ -249,7 +252,6 @@ class PFAlert:
         try:
             result = int(config[listenerName]['Last Transaction Time'])
         except (KeyError, NameError):
-            print('No value found for', listenerName)
             result = 1
             
         return result
