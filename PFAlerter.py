@@ -64,7 +64,7 @@ class PFAlert:
             
         return server
             
-    def teardown(self):
+    def tearDown(self):
         try:
             self.server.quit()
         except smtplib.SMTPServerDisconnected:
