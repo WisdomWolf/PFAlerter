@@ -85,7 +85,10 @@ class PFAlert:
         except:
             print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
             
-        server.quit()
+        try:
+            server.quit()
+        except smtplib.SMTPServerDisconnected:
+            self.writeToLog('STMP Server disconnected unexpectedly')
     
     def buildRequester(self):
         """builds the authentication and request handlers"""
