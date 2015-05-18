@@ -11,6 +11,7 @@ import pdb
 import time
 import sched
 import winsound
+import itertools
 from configparser import ConfigParser
 from socket import gaierror
 from email.message import Message
@@ -42,6 +43,32 @@ class PFAlert:
         self.FROM = self.config['Email']['from']
         self.threshold = self.config['Settings']['threshold']
         self.timerResolution = self.config['Settings']['interval']
+        self.server = self.prepareSMTPServer()
+        
+    def prepareSMTPServer(self):
+        try:
+            server = smtplib.SMTP(self.smtpServer, self.serverPort)
+        except gaierror:
+            input('Error with socket.  Aborting...')
+            os._exit(0)
+        server.ehlo()
+        
+        if server.has_extn('STARTTLS'):
+            server.starttls()
+        
+        try:
+            server.login(self.emailUser, self.emailPassword)
+        except smtplib.SMTPAuthenticationError:
+            input('Unable to authenticate with provided credentials.  Aborting...')
+            os._exit(0)
+            
+        return server
+            
+    def teardown(self):
+        try:
+            self.server.quit()
+        except smtplib.SMTPServerDisconnected:
+            self.writeToLog('SMTP Server disconnected unexpectedly')
         
     def sendEmail(self, subject=None, text=None):
         SUBJECT = subject or 'Python Priority Test'
@@ -59,23 +86,7 @@ class PFAlert:
         message = '\r\n'.join(['To: %s' % self.emailRecipients, 'From: %s' % self.FROM, 'Subject: %s' % SUBJECT, '', TEXT])
         
         try:
-            server = smtplib.SMTP(self.smtpServer, self.serverPort)
-        except gaierror:
-            input('Error with socket.  Aborting...')
-            os._exit(0)
-        server.ehlo()
-        
-        if server.has_extn('STARTTLS'):
-            server.starttls()
-        
-        try:
-            server.login(self.emailUser, self.emailPassword)
-        except smtplib.SMTPAuthenticationError:
-            input('Unable to authenticate with provided credentials.  Aborting...')
-            os._exit(0)
-        
-        try:
-            failures = server.sendmail(self.FROM, self.emailRecipients, msg.as_string())
+            failures = self.server.sendmail(self.FROM, self.emailRecipients, msg.as_string())
             if failures:
                 for x in failures:
                     print(x)
@@ -84,11 +95,6 @@ class PFAlert:
         #    print("Failed to send mail.  Possible permissions error.")
         except:
             print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
-            
-        try:
-            server.quit()
-        except smtplib.SMTPServerDisconnected:
-            self.writeToLog('STMP Server disconnected unexpectedly')
     
     def buildRequester(self):
         """builds the authentication and request handlers"""
@@ -201,17 +207,37 @@ class PFAlert:
         listenerAlarmMap -- dictionary containing listeners that haven't transacted in an acceptable timeframe
         emailRecipients -- addresses to send alert to (Optional)
         """
-        
+        try:
+            winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
+        except RuntimeError:
+            print('Not playing sound file because reasons')
         print('\n***\nAlarm Sounded!\n***\n')
-        winsound.PlaySound("C:\Windows\Media\Alarm10.wav", winsound.SND_FILENAME)
-        for listenerName, lastTransactionTime in listenerAlarmMap.items():
-            self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
-            print('***\nAlarm on', listenerName, '\n***')
-            subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(lastTransactionTime))
-            body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
-            self.sendEmail(subject, body)
-            with open(self.file, 'w') as configfile:
-                self.config.write(configfile)
+        
+        pdb.set_trace()
+        
+        if len(listenerAlarmMap) > 5:
+            minItems = round(len(listenerAlarmMap) / 5)
+            mapLists = list(split_seq(listenerAlarmMap, minItems))
+            for listeners in mapLists:
+                subject = 'Alert! Multiple listeners have gone too long without a transaction'
+                body = ''
+                for listener in listeners:
+                    append = 'Last transaction on ' + str(listener) + ' was at ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(listenerAlarmMap[listener])) + '.\r\n'
+                    body += append
+                    with open(self.file, 'w') as configfile:
+                        self.config.write(configfile)
+                        
+                self.sendEmail(subject, body)
+                
+        else:
+            for listenerName, lastTransactionTime in listenerAlarmMap.items():
+                self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
+                print('***\nAlarm on', listenerName, '\n***')
+                subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(lastTransactionTime))
+                body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
+                self.sendEmail(subject, body)
+                with open(self.file, 'w') as configfile:
+                    self.config.write(configfile)
         
     def writeToLog(self, data, timestamp=None, log_file=None):
         """Writes important information to log file.
@@ -223,7 +249,7 @@ class PFAlert:
         """
         
         timestamp = timestamp or time.strftime('%c')
-        log_file = log_file or 'PFAlerter.log'
+        log_file = log_file or 'C:/Users/Public/Documents/PFAlerter.log'
         with codecs.open(log_file, 'a+', 'utf-8') as file:
             file.write(str(timestamp) + ' - ' + str(data) + '\r\n')
         
@@ -277,14 +303,17 @@ def sendEmail():
     """convenience method for accessing object's sendMail method"""
     alertTest.sendEmail()
     
-#sendEmail()
-#with codecs.open('listener_list.txt', 'w+', 'utf-8') as save_file:
-  #  save_file.write(listenerStr)
-
-# alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
-# s = sched.scheduler(time.time, time.sleep)
-#pdb.set_trace()
-# print('Running...\n')
-# while(True):
-    # s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('testJSON2.txt',))
-    # s.run()
+def split_seq(iterable, size):
+    it = iter(iterable)
+    item = list(itertools.islice(it, size))
+    while item:
+        yield item
+        item = list(itertools.islice(it, size))
+    
+def runTest():
+    alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
+    s = sched.scheduler(time.time, time.sleep)
+    print('Running...\n')
+    while(True):
+        s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('C:/Users/Public/Documents/testJSON2.txt',))
+        s.run()
