@@ -49,8 +49,8 @@ class PFAlert:
         try:
             server = smtplib.SMTP(self.smtpServer, self.serverPort)
         except gaierror:
-            input('Error with socket.  Aborting...')
-            os._exit(0)
+            self.writeToLog('Error with socket.  Shutting Down.')
+            self.tearDown()
         server.ehlo()
         
         if server.has_extn('STARTTLS'):
@@ -59,8 +59,8 @@ class PFAlert:
         try:
             server.login(self.emailUser, self.emailPassword)
         except smtplib.SMTPAuthenticationError:
-            input('Unable to authenticate with provided credentials.  Aborting...')
-            os._exit(0)
+            self.writeToLog('Unable to authenticate with provided credentials.  Shutting Down.')
+            self.tearDown()
             
         return server
             
@@ -69,6 +69,8 @@ class PFAlert:
             self.server.quit()
         except smtplib.SMTPServerDisconnected:
             self.writeToLog('SMTP Server disconnected unexpectedly')
+            
+        os._exit(0)
         
     def sendEmail(self, subject=None, text=None):
         SUBJECT = subject or 'Python Priority Test'
@@ -89,12 +91,13 @@ class PFAlert:
             failures = self.server.sendmail(self.FROM, self.emailRecipients, msg.as_string())
             if failures:
                 for x in failures:
-                    print(x)
-            print("Sucessfully sent the mail")
+                    self.writeToLog('Mail send error: ' + str(x))
+            self.writeToLog('Sucessfully sent the mail')
         #except smtplib.SMTPDataError:
         #    print("Failed to send mail.  Possible permissions error.")
         except:
             print('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
+            self.writeToLog('Failed to send mail.\nUnexpected Error:', sys.exc_info()[0], '\n', sys.exc_info()[1])
     
     def buildRequester(self):
         """builds the authentication and request handlers"""
@@ -222,20 +225,27 @@ class PFAlert:
                 for listener in listeners:
                     append = 'Last transaction on ' + str(listener) + ' was at ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(listenerAlarmMap[listener])) + '.\r\n'
                     body += append
-                    with open(self.file, 'w') as configfile:
-                        self.config.write(configfile)
+                    self.saveTransactionTime(listener, listenerAlarmMap[listener])
                         
                 self.sendEmail(subject, body)
+                self.writeToLog('Alert Email sent')
                 
         else:
             for listenerName, lastTransactionTime in listenerAlarmMap.items():
-                self.config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
                 print('***\nAlarm on', listenerName, '\n***')
                 subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(lastTransactionTime))
                 body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
                 self.sendEmail(subject, body)
-                with open(self.file, 'w') as configfile:
-                    self.config.write(configfile)
+                self.saveTransactionTime(listener, listenerAlarmMap[listener])
+                    
+    def saveTransactionTime(self, listenerName, lastTransactionTime, file=None):
+        file = file or os.path.join(os.path.dirname(configFile), 'lastTransactionTimes.ini')
+        config = ConfigParser()
+        configFile = file
+        config.read(file)
+        config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
+        with open(file, 'w') as f:
+            config.write(f)
         
     def writeToLog(self, data, timestamp=None, log_file=None):
         """Writes important information to log file.
@@ -297,9 +307,9 @@ def pullJSONValues(key, list):
     
     return elementList
     
-def sendEmail():
+def sendEmail(subject=None, text=None):
     """convenience method for accessing object's sendMail method"""
-    alertTest.sendEmail()
+    alertTest.sendEmail(subject, text)
     
 def split_seq(iterable, size):
     it = iter(iterable)
@@ -309,9 +319,9 @@ def split_seq(iterable, size):
         item = list(itertools.islice(it, size))
     
 def runTest():
-    alertTest = PFAlert('C:/Users/Public/Documents/config.ini')
+    alertTest = PFAlert('C:\\Users\\Public\\Documents\\config.ini')
     s = sched.scheduler(time.time, time.sleep)
     print('Running...\n')
     while(True):
-        s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('C:/Users/Public/Documents/testJSON2.txt',))
+        s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('C:\\Users\\Public\\Documents\\testJSON2.txt',))
         s.run()
