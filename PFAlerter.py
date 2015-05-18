@@ -22,11 +22,12 @@ class PFAlert:
     HEADERS = {'Accept':JSON_REQ}
 
     def __init__(self, configFile, threshold=None, timerResolution=None,
-                 emailRecipients=None
+                 emailRecipients=None, transactFile=None
                 ):
         self.config = ConfigParser()
         self.config.read(configFile)
         self.file = configFile
+        self.transactFile = transactFile or os.path.join(os.path.dirname(configFile), 'lastTransactionTimes.ini')
         self.theurl = self.config['PF Listener']['url']
         self.serverUsername = self.config['PF Listener']['username']
         self.serverPassword = self.config['PF Listener']['password']
@@ -185,12 +186,7 @@ class PFAlert:
         epoch = int(time.time())
         timeSinceLastTransaction = int(timeSinceLastTransaction / 1000)
         lastTransactionTime = 0
-        
-        try:
-            lastTransactionLogged = int(self.config[listenerName]['Last Transaction Time'])
-        except (KeyError, NameError):
-            print('No value found for', listenerName)
-            lastTransactionLogged = 1
+        lastTransactionLogged = self.readTransactionTime(listenerName)
         
         if timeSinceLastTransaction > threshold:
             lastTransactionTime = int(epoch - timeSinceLastTransaction)
@@ -236,16 +232,27 @@ class PFAlert:
                 subject = 'Alert! ' + str(listenerName) + ' last transaction was ' + time.strftime('%I:%M%p on %a, %b %d, %Y', time.localtime(lastTransactionTime))
                 body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
                 self.sendEmail(subject, body)
-                self.saveTransactionTime(listener, listenerAlarmMap[listener])
+                self.saveTransactionTime(listenerName, lastTransactionTime)
                     
-    def saveTransactionTime(self, listenerName, lastTransactionTime, file=None):
-        file = file or os.path.join(os.path.dirname(configFile), 'lastTransactionTimes.ini')
+    def saveTransactionTime(self, listenerName, lastTransactionTime):
         config = ConfigParser()
-        configFile = file
+        file = self.transactFile
         config.read(file)
         config[listenerName] = {'Last Transaction Time': str(lastTransactionTime)}
         with open(file, 'w') as f:
             config.write(f)
+            
+    def readTransactionTime(self, listenerName):
+        config = ConfigParser()
+        file = self.transactFile
+        config.read(file)
+        try:
+            result = int(config[listenerName]['Last Transaction Time'])
+        except (KeyError, NameError):
+            print('No value found for', listenerName)
+            result = 1
+            
+        return result
         
     def writeToLog(self, data, timestamp=None, log_file=None):
         """Writes important information to log file.
