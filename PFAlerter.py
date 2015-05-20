@@ -48,6 +48,8 @@ class PFAlert:
         self.killed = False
         
     def prepareSMTPServer(self):
+        """Setup SMTP Server connection for email sending"""
+        
         try:
             server = smtplib.SMTP(self.smtpServer, self.serverPort)
         except gaierror:
@@ -67,16 +69,26 @@ class PFAlert:
         return server
             
     def tearDown(self):
+        """Tear Down existing connections"""
+        
         try:
             self.server.quit()
         except smtplib.SMTPServerDisconnected:
             self.writeToLog('SMTP Server disconnected unexpectedly')
             
+        self.writeToLog('Shutting down service')
         self.killed = True
         time.sleep(5)
         os._exit(0)
         
     def sendEmail(self, subject=None, text=None):
+        """Sends Email
+        
+        Keyword arguments:
+        subject -- Email subject
+        text -- Email body
+        """
+        
         SUBJECT = subject or 'Python Priority Test'
         TEXT = text or 'Sending this message with high priority because reasons.'
         

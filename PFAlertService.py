@@ -29,6 +29,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         win32event.SetEvent(self.hWaitStop)
         self.isAlive = False
         self.alerter.tearDown()
+        self.alerter.writeToLog('Service stopped.')
 
     def SvcDoRun(self):
         servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
@@ -38,8 +39,10 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
 
     def main(self):
         self.alerter = PFAlert('C:/Users/Public/Documents/config.ini')
+        self.alerter.writeToLog('Service started.')
         while self.isAlive:
             if self.alerter.killed:
+                self.alerter.writeToLog('Service received kill command.  Stopping service.')
                 messagebox.showinfo(title='Critical Error', message='PFAlert service has died.')
             #self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
             self.s.enter(float(self.alerter.timerResolution), 1, self.alerter.testJSON, argument=('C:/Users/Public/Documents/testJSON2.txt',))
