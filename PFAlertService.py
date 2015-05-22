@@ -25,25 +25,35 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         socket.setdefaulttimeout(60)
 
     def SvcStop(self):
+        #self.isAlive = False
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
-        self.isAlive = False
-        self.alerter.tearDown()
-        self.alerter.writeToLog('Service stopped.')
 
     def SvcDoRun(self):
         servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
                               servicemanager.PYS_SERVICE_STARTED,
                               (self._svc_name_,''))
+        self.timeout = 30000
         self.main()
 
     def main(self):
         self.alerter = PFAlert('C:/Users/Public/Documents/config.ini')
         self.alerter.writeToLog('Service started.')
-        while self.isAlive:
-            if self.alerter.killed:
-                self.alerter.writeToLog('Service received kill command.  Stopping service.')
-                messagebox.showinfo(title='Critical Error', message='PFAlert service has died.')
+        while True:
+            rc = win32event.WaitForSingleObject(self.hWaitStop, self.timeout)
+            # Check to see if self.hWaitStop happened
+            if rc == win32event.WAIT_OBJECT_0:
+                # Stop signal encountered
+                self.alerter.tearDown()
+                servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
+                              servicemanager.PYS_SERVICE_STOPPED,
+                              (self._svc_name_,''))  #For Event Log
+                break
+                #things&stuff
+            # if self.alerter.killed:
+                # self.alerter.writeToLog('Service received kill command.  Stopping service.')
+                # messagebox.showinfo(title='Critical Error', message='PFAlert service has died.')
+                # self.SvcStop()
             #self.s.enter(10, 1, test_time, argument=(5,)) #trailing comma is necessary because argument is a sequence
             self.s.enter(float(self.alerter.timerResolution), 1, self.alerter.testJSON, argument=('C:/Users/Public/Documents/testJSON2.txt',))
             self.s.run()
