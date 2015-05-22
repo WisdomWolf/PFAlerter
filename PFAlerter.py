@@ -144,7 +144,11 @@ class PFAlert:
         self.buildRequester()
         
         req = urllib.request.Request(self.theurl, None, PFAlert.HEADERS)
-        response = urllib.request.urlopen(req)
+        try:
+            response = urllib.request.urlopen(req)
+        except urllib.error.URLError:
+            self.sendEmail('PF Server is down', 'Unable to reach the Pilot Fish server.')
+            return None
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
@@ -339,8 +343,12 @@ def split_seq(iterable, size):
         yield item
         item = list(itertools.islice(it, size))
     
+def buildObject(file=None):
+    file = file or 'C:\\Users\\Public\\Documents\\config.ini'
+    return PFAlert(file)
+    
 def runTest():
-    alertTest = PFAlert('C:\\Users\\Public\\Documents\\config.ini')
+    alertTest = buildObject()
     s = sched.scheduler(time.time, time.sleep)
     print('Running...\n')
     while(True):

@@ -49,7 +49,6 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
                               servicemanager.PYS_SERVICE_STOPPED,
                               (self._svc_name_,''))  #For Event Log
                 break
-                #things&stuff
             # if self.alerter.killed:
                 # self.alerter.writeToLog('Service received kill command.  Stopping service.')
                 # messagebox.showinfo(title='Critical Error', message='PFAlert service has died.')
