@@ -243,7 +243,6 @@ class PFAlert:
                     self.saveTransactionTime(listener, listenerAlarmMap[listener])
                         
                 self.sendEmail(subject, body)
-                self.writeToLog('Alert Email sent')
                 
         else:
             for listenerName, lastTransactionTime in listenerAlarmMap.items():
@@ -252,6 +251,8 @@ class PFAlert:
                 body = 'You are receiving this alert because it has been more than ' + self.threshold + ' seconds since there was a transaction on ' + listenerName
                 self.sendEmail(subject, body)
                 self.saveTransactionTime(listenerName, lastTransactionTime)
+                
+        self.writeToLog('Alert Email sent')
                     
     def saveTransactionTime(self, listenerName, lastTransactionTime):
         config = ConfigParser()
