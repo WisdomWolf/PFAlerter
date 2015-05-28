@@ -149,6 +149,9 @@ class PFAlert:
         except urllib.error.URLError:
             self.sendEmail('PF Server is down', 'Unable to reach the Pilot Fish server.')
             return None
+        else:
+            #Reset flag
+            pass
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
@@ -163,7 +166,11 @@ class PFAlert:
         #self.buildRequester()
         #jsonData = self.pullJSON()
         #jsonToTextFile(jsonData)
-        data = pullJSONFromTextFile(file)
+        if file:
+            data = pullJSONFromTextFile(file)
+        else:
+            data = pullJSON()
+            
         listenerList = self.getListenerList(data)
         self.listenersIterator(listenerList)
         
