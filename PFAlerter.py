@@ -1,4 +1,5 @@
 #! python3
+#Requires PyWin32 (http://sourceforge.net/projects/pywin32/)
 import os 
 import sys
 import json
