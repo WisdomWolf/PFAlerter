@@ -281,8 +281,10 @@ class PFAlert:
             
         return result
     
-    def setURLRequestFlag(self, flagValue)
+    def setURLRequestFlag(self, flagValue):
         """Sets the value of the URLRequestFlag to the flagValue
+        
+        URLRequestFail values: 0 -- url request successful, 1 -- url request failed
         
         Keyword arguments:
         flagValue -- the value to which the URLRequestFlag will be set
@@ -291,9 +293,22 @@ class PFAlert:
         config = ConfigParser()
         file = self.transactfile
         config.read(file)
-        config[URLRequestFlag] = {'URLRequestFlag' : str(flagValue)}
+        config[URLRequestFlag] = {'URLRequestFail' : str(flagValue)}
         with open(file, 'w') as f:
             config.write(f)
+            
+    def getURLRequestFlag(self):
+        """Reads the value of the URLRequestFlag and returns it"""
+        
+        config = ConfigParser()
+        file = sefl.transactFile
+        config.read(file)
+        try:
+            result = int(config['URLRequestFlag']['URLRequestFail'])
+        except (KeyError, NameError):
+            result = -1
+        
+        return result
     
     def writeToLog(self, data, timestamp=None, log_file=None):
         """Writes important information to log file.
