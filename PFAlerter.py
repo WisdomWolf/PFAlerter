@@ -148,11 +148,17 @@ class PFAlert:
         try:
             response = urllib.request.urlopen(req)
         except urllib.error.URLError:
-            self.sendEmail('PF Server is down', 'Unable to reach the Pilot Fish server.')
+            if self.getURLRequestFlag() == 0:
+                #write to log when the PF Server is down
+                self.sendEmail('PF Server is down', 'Unable to reach the Pilot Fish server.')
+                self.setURLRequestFlag(1)
+            if self.getURLRequestFlag() == -1:
+                #write to log could not get URL request state from lastTransactionTimes.ini
+                pass
             return None
         else:
-            #Reset flag
-            pass
+            if self.getURLRequestFlag() == 1:
+                setURLRequestFlag(0)
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
