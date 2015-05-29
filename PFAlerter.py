@@ -280,7 +280,21 @@ class PFAlert:
             result = 1
             
         return result
+    
+    def setURLRequestFlag(self, flagValue)
+        """Sets the value of the URLRequestFlag to the flagValue
         
+        Keyword arguments:
+        flagValue -- the value to which the URLRequestFlag will be set
+        """
+        
+        config = ConfigParser()
+        file = self.transactfile
+        config.read(file)
+        config[URLRequestFlag] = {'URLRequestFlag' : str(flagValue)}
+        with open(file, 'w') as f:
+            config.write(f)
+    
     def writeToLog(self, data, timestamp=None, log_file=None):
         """Writes important information to log file.
         

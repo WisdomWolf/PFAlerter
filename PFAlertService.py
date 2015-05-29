@@ -9,7 +9,6 @@ import win32service
 import win32event
 import servicemanager
 import socket
-from tkinter import messagebox
 from PFAlerter import PFAlert
 
 
