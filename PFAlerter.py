@@ -158,7 +158,7 @@ class PFAlert:
             return None
         else:
             if self.getURLRequestFlag() == 1:
-                setURLRequestFlag(0)
+                self.setURLRequestFlag(0)
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
