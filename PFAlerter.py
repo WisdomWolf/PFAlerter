@@ -307,7 +307,7 @@ class PFAlert:
         """Reads the value of the URLRequestFlag and returns it"""
         
         config = ConfigParser()
-        file = sefl.transactFile
+        file = self.transactFile
         config.read(file)
         try:
             result = int(config['URLRequestFlag']['URLRequestFail'])
