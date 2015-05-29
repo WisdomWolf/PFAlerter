@@ -159,6 +159,7 @@ class PFAlert:
         else:
             if self.getURLRequestFlag() == 1:
                 self.setURLRequestFlag(0)
+                self.writeToLog('Pilot Fish server now reachable again.')
         str_response = response.readall().decode('utf-8')
         
         return json.loads(str_response)
