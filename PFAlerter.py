@@ -297,9 +297,9 @@ class PFAlert:
         """
         
         config = ConfigParser()
-        file = self.transactfile
+        file = self.transactFile
         config.read(file)
-        config[URLRequestFlag] = {'URLRequestFail' : str(flagValue)}
+        config['URLRequestFlag'] = {'URLRequestFail' : str(flagValue)}
         with open(file, 'w') as f:
             config.write(f)
             
