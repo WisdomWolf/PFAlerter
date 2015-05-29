@@ -22,9 +22,12 @@ class PFAlert:
     JSON_REQ = 'application/json'
     HEADERS = {'Accept':JSON_REQ}
 
-    def __init__(self, configFile, threshold=None, timerResolution=None,
+    def __init__(self, configFile=None, threshold=None, timerResolution=None,
                  emailRecipients=None, transactFile=None
                 ):
+        self.appPath = os.path.join(os.getenv('APPDATA'), 'PFAlert')
+        if not configFile:
+            configFile = os.path.join(self.appPath, 'config.ini')
         self.config = ConfigParser()
         self.config.read(configFile)
         self.file = configFile
@@ -312,8 +315,9 @@ class PFAlert:
         config.read(file)
         try:
             result = int(config['URLRequestFlag']['URLRequestFail'])
-        except (KeyError, NameError):
-            result = -1
+        except (KeyError, NameError, ValueError):
+            print(sys.exc_info()[0], '\n', sys.exc_info()[1])
+            result = 0
         
         return result
     
