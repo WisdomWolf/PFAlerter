@@ -24,7 +24,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         socket.setdefaulttimeout(60)
 
     def SvcStop(self):
-        #self.isAlive = False
+        self.isAlive = False
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
 
@@ -38,7 +38,7 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
     def main(self):
         self.alerter = PFAlert('C:/Users/Public/Documents/config.ini')
         self.alerter.writeToLog('Service started.')
-        while True:
+        while self.isAlive:
             rc = win32event.WaitForSingleObject(self.hWaitStop, self.timeout)
             # Check to see if self.hWaitStop happened
             if rc == win32event.WAIT_OBJECT_0:
