@@ -42,7 +42,7 @@ class PFAlert:
             input('malformed config file. <Bad Server Port> Aborting...')
             os._exit(0)
         self.emailUser = self.config['Email']['senderAddress']
-        self.emailPassword = (base64.b64decode(self.config['Email']['senderPassword'])).decode()
+        self.emailPassword = self.config['Email']['senderPassword']#(base64.b64decode(self.config['Email']['senderPassword'])).decode()
         recipients = self.config['Email']['receiverAddresses']
         self.emailRecipients = recipients.split(';')
         self.FROM = self.config['Email']['from']
@@ -165,7 +165,7 @@ class PFAlert:
                 self.writeToLog('Pilot Fish server now reachable again.')
         str_response = response.readall().decode('utf-8')
         
-        return json.loads(str_response)
+        return str_response #json.loads(str_response)
         
     def testJSON(self, file=None):
         """test json information against threshold
@@ -202,7 +202,7 @@ class PFAlert:
         for listener in listenerList:
             #parse listenerName and timeSinceLastTransaction
             listenerName = listener['name']
-            timeSinceLastTransaction = listener['TimeSinceLastTransaction']
+            timeSinceLastTransaction = listener['milliSecSinceLastTx']
             a, t = self.thresholdCompare(listenerName, timeSinceLastTransaction, int(self.threshold))
             if a:
                 alarmList[a] = t
@@ -403,3 +403,4 @@ def runTest():
     while(True):
         s.enter(float(alertTest.timerResolution), 1, alertTest.testJSON, argument=('C:\\Users\\Public\\Documents\\testJSON2.txt',))
         s.run()
+pdb.set_trace()
